@@ -1,5 +1,5 @@
 import 'package:crypto_currency/core/utils/app_theme.dart';
-import 'package:crypto_currency/feature/login/presentation/screens/login_page.dart';
+import 'package:crypto_currency/feature/login/pressentation/login_page.dart';
 import 'package:crypto_currency/feature/wallet/presentation/bloc/wallet_bloc.dart';
 import 'package:crypto_currency/locator.dart';
 import 'package:flutter/material.dart';

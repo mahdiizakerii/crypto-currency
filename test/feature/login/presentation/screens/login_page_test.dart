@@ -1,6 +1,6 @@
 import 'package:crypto_currency/core/resources/data_state.dart';
 import 'package:crypto_currency/core/utils/app_theme.dart';
-import 'package:crypto_currency/feature/login/presentation/screens/login_page.dart';
+import 'package:crypto_currency/feature/login/pressentation/login_page.dart';
 import 'package:crypto_currency/feature/wallet/domain/entites/wallet_entities.dart';
 import 'package:crypto_currency/feature/wallet/domain/repository/wallet_repository.dart';
 import 'package:crypto_currency/feature/wallet/domain/use_cases/get_wallet_use_case.dart';
