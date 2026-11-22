@@ -7,3 +7,7 @@ class LoginDigitPressed extends LoginEvent {
 }
 
 class LoginDeletePressed extends LoginEvent {}
+
+class BiometricAvailabilityRequested extends LoginEvent {}
+
+class BiometricAuthenticationRequested extends LoginEvent {}

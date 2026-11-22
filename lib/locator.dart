@@ -1,3 +1,9 @@
+import 'package:crypto_currency/feature/login/bloc/login_bloc.dart';
+import 'package:crypto_currency/feature/login/data/data%20source/biometric_local_datasource.dart';
+import 'package:crypto_currency/feature/login/data/data%20source/repository/biometric_repository_impl.dart';
+import 'package:crypto_currency/feature/login/domain/repository/biometric_repository.dart';
+import 'package:crypto_currency/feature/login/domain/repository/use_case/authenticate_biometric.dart';
+import 'package:crypto_currency/feature/login/domain/repository/use_case/check_biometric_availability.dart';
 import 'package:crypto_currency/feature/wallet/data/data_source/remote/api_provider.dart';
 import 'package:crypto_currency/feature/wallet/data/repository/wallet_repository_impl.dart';
 import 'package:crypto_currency/feature/wallet/domain/repository/wallet_repository.dart';
@@ -25,4 +31,30 @@ void setup() {
 
   // bloc
   locator.registerSingleton<WalletBloc>(WalletBloc(locator()));
+  // biometric datasource
+  locator.registerLazySingleton<BiometricLocalDataSource>(
+    () => BiometricLocalDataSourceImpl(),
+  );
+
+  // biometric repository
+  locator.registerLazySingleton<BiometricRepository>(
+    () => BiometricRepositoryImpl(localDataSource: locator()),
+  );
+
+  // biometric use cases
+  locator.registerLazySingleton<CheckBiometricAvailability>(
+    () => CheckBiometricAvailability(locator()),
+  );
+
+  locator.registerLazySingleton<AuthenticateBiometric>(
+    () => AuthenticateBiometric(locator()),
+  );
+
+  // login bloc
+  locator.registerFactory<LoginBloc>(
+    () => LoginBloc(
+      checkBiometricAvailability: locator(),
+      authenticateBiometric: locator(),
+    ),
+  );
 }

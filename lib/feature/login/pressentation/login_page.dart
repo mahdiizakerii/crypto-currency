@@ -1,8 +1,7 @@
-import 'dart:async';
-
 import 'package:crypto_currency/core/utils/app_theme.dart';
-import 'package:crypto_currency/feature/login/presentation/bloc/login_bloc.dart';
-import 'package:crypto_currency/feature/login/presentation/bloc/login_state.dart';
+import 'package:crypto_currency/feature/login/bloc/login_bloc.dart';
+import 'package:crypto_currency/feature/login/bloc/login_event.dart';
+import 'package:crypto_currency/feature/login/bloc/login_state.dart';
 import 'package:crypto_currency/feature/login/pressentation/widgets/number.dart';
 import 'package:crypto_currency/feature/wallet/presentation/pages/wallet_page.dart';
 import 'package:flutter/material.dart';
@@ -17,12 +16,11 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final LoginBloc _loginBloc = LoginBloc();
-
   @override
-  void dispose() {
-    unawaited(_loginBloc.close());
-    super.dispose();
+  void initState() {
+    super.initState();
+
+    context.read<LoginBloc>().add(BiometricAvailabilityRequested());
   }
 
   @override
@@ -35,54 +33,73 @@ class _LoginPageState extends State<LoginPage> {
         systemNavigationBarColor: AppTheme.background,
         systemNavigationBarIconBrightness: Brightness.light,
       ),
-      child: BlocProvider.value(
-        value: _loginBloc,
-        child: BlocConsumer<LoginBloc, LoginState>(
-          listener: (context, state) {
-            if (state.passcode == '1111') {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => const WalletPage()),
-              );
-            } else {
-              if (state.passcode.length == 4) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Incorrect passcode. Please try again.'),
-                    duration: Duration(seconds: 2),
-                  ),
-                );
-              }
-            }
-          },
-          builder: (context, state) {
-            return Scaffold(
-              body: SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(30, 0, 30, 28),
-                  child: Column(
-                    children: [
-                      const SizedBox(height: 74),
-                      const _LoginIcon(),
-                      const SizedBox(height: 28),
-                      const Text(
-                        'Enter Passcode',
-                        style: TextStyle(
-                          color: AppTheme.textPrimary,
-                          fontSize: 24,
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                      const SizedBox(height: 25),
-                      _PasscodeIndicator(passcode: state.passcode),
-                      Expanded(child: NumberFiled(loginBloc: _loginBloc)),
-                    ],
-                  ),
-                ),
+      child: BlocConsumer<LoginBloc, LoginState>(
+        listener: (context, state) {
+          if (state.passcode == '1111' ||
+              state.biometricStatus == BiometricStatus.authenticated) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => const WalletPage()),
+            );
+          } else if (state.passcode.length == 4) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Incorrect passcode. Please try again.'),
+                duration: Duration(seconds: 2),
               ),
             );
-          },
-        ),
+          } else if (state.biometricStatus == BiometricStatus.failed) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Biometric authentication failed')),
+            );
+          }
+        },
+
+        builder: (context, state) {
+          return Scaffold(
+            body: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(30, 0, 30, 28),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 74),
+                    const _LoginIcon(),
+                    const SizedBox(height: 28),
+                    const Text(
+                      'Enter Passcode',
+                      style: TextStyle(
+                        color: AppTheme.textPrimary,
+                        fontSize: 24,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                    const SizedBox(height: 25),
+                    _PasscodeIndicator(passcode: state.passcode),
+                    if (state.biometricStatus == BiometricStatus.available) ...[
+                      const SizedBox(height: 30),
+                      IconButton(
+                        onPressed: () {
+                          context.read<LoginBloc>().add(
+                            BiometricAuthenticationRequested(),
+                          );
+                        },
+                        icon: const Icon(
+                          Icons.fingerprint,
+                          size: 48,
+                          color: AppTheme.primary,
+                        ),
+                        tooltip: 'Authenticate with biometrics',
+                      ),
+                    ],
+                    Expanded(
+                      child: NumberFiled(loginBloc: context.read<LoginBloc>()),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }
