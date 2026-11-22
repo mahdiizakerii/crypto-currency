@@ -7,4 +7,4 @@ sealed class WalletEvent extends Equatable {
   List<Object> get props => [];
 }
 
-class fetchWalletData extends WalletEvent {}
+class FetchWalletData extends WalletEvent {}

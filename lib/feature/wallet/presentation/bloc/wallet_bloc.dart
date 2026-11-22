@@ -11,10 +11,10 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
   final GetWalletUseCase getWalletUseCase;
   WalletBloc(this.getWalletUseCase)
     : super(WalletState(walletStatus: WalletLoading())) {
-    on<fetchWalletData>(onFetchWalletData);
+    on<FetchWalletData>(onFetchWalletData);
   }
   Future<void> onFetchWalletData(
-    fetchWalletData event,
+    FetchWalletData event,
     Emitter<WalletState> emit,
   ) async {
     emit(state.copyWith(WalletLoading()));

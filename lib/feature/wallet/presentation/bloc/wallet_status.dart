@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 @immutable
 sealed class WalletStatus extends Equatable {
   @override
-  List<Object?> get props => throw UnimplementedError();
+  List<Object?> get props => const [];
 }
 
 class WalletLoading extends WalletStatus {}

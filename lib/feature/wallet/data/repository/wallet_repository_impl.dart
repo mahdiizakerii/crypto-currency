@@ -1,28 +1,26 @@
-import 'dart:math';
-
 import 'package:crypto_currency/core/resources/data_state.dart';
 import 'package:crypto_currency/feature/wallet/data/data_source/remote/api_provider.dart';
-import 'package:crypto_currency/feature/wallet/data/models/wallet_model.dart';
 import 'package:crypto_currency/feature/wallet/domain/entites/wallet_entities.dart';
 import 'package:crypto_currency/feature/wallet/domain/repository/wallet_repository.dart';
 import 'package:dio/dio.dart';
 
 class WalletRepositoryImpl extends WalletRepository {
-  ApiProvider apiProvider;
+  final ApiProvider apiProvider;
   WalletRepositoryImpl(this.apiProvider);
 
   @override
   Future<DataState<WalletEntities>> getWallet() async {
     try {
-      Response response = await apiProvider.getWalletData() as Response;
-      if (response.statusCode == 200) {
-        WalletEntities walletEntities = WalletModel.fromJson(response.data);
-        return DataSuccess(walletEntities);
-      } else {
-        return DataFailed("Failed to fetch wallet data: $e");
+      final wallet = await apiProvider.getWalletData();
+      return DataSuccess(wallet);
+    } on DioException catch (error) {
+      final responseData = error.response?.data;
+      if (responseData is Map && responseData['error'] is String) {
+        return DataFailed(responseData['error'] as String);
       }
-    } catch (e) {
-      return DataFailed("Failed to fetch wallet data: $e");
+      return DataFailed(error.message ?? 'Failed to fetch wallet data.');
+    } catch (error) {
+      return DataFailed('Failed to fetch wallet data: $error');
     }
   }
 }

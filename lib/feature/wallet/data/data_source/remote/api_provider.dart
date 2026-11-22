@@ -3,18 +3,20 @@ import 'package:crypto_currency/feature/wallet/data/models/wallet_model.dart';
 import 'package:dio/dio.dart';
 
 class ApiProvider {
-  ApiProvider(String authorization, {Dio? dio})
-    : _authorization = authorization,
+  ApiProvider({Dio? dio, String? authorization})
+    : _authorization = authorization?.trim(),
       _dio = dio ?? Dio();
 
-  final String _authorization;
+  final String? _authorization;
   final Dio _dio;
 
   Future<WalletModel> getWalletData() async {
     final response = await _dio.get(
       Constants.walletBaseUrl,
       queryParameters: const {'method': 'wallet'},
-      options: Options(headers: {'Authorization': _authorization}),
+      options: _authorization == null
+          ? null
+          : Options(headers: {'Authorization': _authorization}),
     );
 
     final responseData = response.data;
