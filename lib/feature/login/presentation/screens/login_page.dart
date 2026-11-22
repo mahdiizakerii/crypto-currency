@@ -4,6 +4,7 @@ import 'package:crypto_currency/core/utils/app_theme.dart';
 import 'package:crypto_currency/feature/login/presentation/bloc/login_bloc.dart';
 import 'package:crypto_currency/feature/login/presentation/bloc/login_state.dart';
 import 'package:crypto_currency/feature/login/presentation/widgets/number.dart';
+import 'package:crypto_currency/feature/wallet/presentation/pages/wallet_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';

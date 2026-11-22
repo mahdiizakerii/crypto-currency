@@ -1,20 +1,28 @@
 import 'package:crypto_currency/core/utils/app_theme.dart';
 import 'package:crypto_currency/feature/login/presentation/screens/login_page.dart';
+import 'package:crypto_currency/feature/wallet/presentation/bloc/wallet_bloc.dart';
+import 'package:crypto_currency/locator.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 void main() {
-  runApp(const MyApp());
+  setup();
+  runApp(const CryptoCurrencyApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class CryptoCurrencyApp extends StatelessWidget {
+  const CryptoCurrencyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Crypto Currency',
-      theme: AppTheme.dark,
-      home: const LoginPage(),
+    return BlocProvider<WalletBloc>.value(
+      value: locator<WalletBloc>(),
+      child: MaterialApp(
+        title: 'TonKeeper',
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.dark,
+        home: const LoginPage(),
+      ),
     );
   }
 }
