@@ -1,4 +1,5 @@
-import 'package:crypto_currency/feature/login/presentation/pages/login_page.dart';
+import 'package:crypto_currency/core/utils/app_theme.dart';
+import 'package:crypto_currency/feature/login/presentation/screens/login_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -6,7 +7,14 @@ void main() {
   testWidgets('enters and deletes digits without showing the passcode', (
     WidgetTester tester,
   ) async {
-    await tester.pumpWidget(const MaterialApp(home: LoginPage()));
+    tester.view.physicalSize = const Size(402, 874);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      MaterialApp(theme: AppTheme.dark, home: const LoginPage()),
+    );
 
     expect(find.text('Enter Passcode'), findsOneWidget);
 

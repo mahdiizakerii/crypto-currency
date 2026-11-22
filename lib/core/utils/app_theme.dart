@@ -13,14 +13,23 @@ class AppTheme {
   static const dividerColor = Color(0x269AA1CC);
   static const positiveIconBackground = Color(0x2926D3A0);
   static const warningIconBackground = Color(0x29FFB84D);
+  static const border = Color(0xFF263FC6);
+  static const statusBarColor = Colors.transparent;
 
   static final dark = ThemeData(
     brightness: Brightness.dark,
     scaffoldBackgroundColor: background,
-    colorScheme: ColorScheme.fromSeed(
-      seedColor: primary,
-      brightness: Brightness.dark,
-    ).copyWith(primary: primary, surface: background),
+    colorScheme:
+        ColorScheme.fromSeed(
+          seedColor: primary,
+          brightness: Brightness.dark,
+        ).copyWith(
+          primary: primary,
+          surface: surface,
+          onSurface: textPrimary,
+          onPrimary: textPrimary,
+          outline: border,
+        ),
     appBarTheme: const AppBarTheme(
       backgroundColor: background,
       foregroundColor: textPrimary,

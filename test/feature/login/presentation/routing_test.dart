@@ -12,6 +12,11 @@ void main() {
   testWidgets('four-digit passcode opens the wallet route', (
     WidgetTester tester,
   ) async {
+    tester.view.physicalSize = const Size(402, 874);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
     await tester.pumpWidget(
       BlocProvider<WalletBloc>(
         create: (_) => WalletBloc(GetWalletUseCase(_EmptyWalletRepository())),
