@@ -1,5 +1,6 @@
 import 'package:crypto_currency/config/services/services/biometric_service.dart';
 import 'package:crypto_currency/core/utils/app_theme.dart';
+import 'package:crypto_currency/feature/chart/presentation/pages/chart_page.dart';
 import 'package:crypto_currency/feature/wallet/domain/entites/wallet_entities.dart';
 import 'package:crypto_currency/feature/wallet/presentation/bloc/wallet_bloc.dart';
 import 'package:crypto_currency/feature/wallet/presentation/bloc/wallet_status.dart';
@@ -78,7 +79,7 @@ class _WalletPageState extends State<WalletPage> with WidgetsBindingObserver {
             child: const MainBottomNav(
               screens: [
                 _WalletDashboardPage(),
-                _ComingSoonPage(title: 'Chart'),
+                ChartPage(),
                 _ComingSoonPage(title: 'News'),
                 _ComingSoonPage(title: 'Collectibles'),
               ],
