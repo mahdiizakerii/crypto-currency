@@ -9,12 +9,15 @@ import 'package:crypto_currency/feature/wallet/presentation/pages/wallet_page.da
 import 'package:crypto_currency/feature/wallet/presentation/widgets/wallet_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('shows the empty wallet and persistent navigation tabs', (
     WidgetTester tester,
   ) async {
+    FlutterSecureStorage.setMockInitialValues({});
+
     await tester.pumpWidget(
       BlocProvider<WalletBloc>(
         create: (_) => WalletBloc(GetWalletUseCase(_EmptyWalletRepository())),
@@ -41,6 +44,17 @@ void main() {
     await tester.pump();
     expect(find.bySemanticsLabel('Biometrics on'), findsOneWidget);
 
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pumpWidget(
+      BlocProvider<WalletBloc>(
+        create: (_) => WalletBloc(GetWalletUseCase(_EmptyWalletRepository())),
+        child: MaterialApp(theme: AppTheme.dark, home: const WalletPage()),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.bySemanticsLabel('Biometrics on'), findsOneWidget);
+
     await tester.tap(find.byKey(const ValueKey('biometric-switch')));
     await tester.pump();
     expect(find.bySemanticsLabel('Biometrics off'), findsOneWidget);
@@ -49,6 +63,7 @@ void main() {
   testWidgets('authenticates again when the app returns to the foreground', (
     WidgetTester tester,
   ) async {
+    FlutterSecureStorage.setMockInitialValues({});
     final biometricService = _FakeBiometricService();
 
     await tester.pumpWidget(

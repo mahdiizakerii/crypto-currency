@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:crypto_currency/config/services/services/biometric_service.dart';
 import 'package:crypto_currency/core/utils/app_theme.dart';
 import 'package:crypto_currency/feature/wallet/domain/entites/wallet_entities.dart';
@@ -8,6 +10,7 @@ import 'package:crypto_currency/feature/wallet/presentation/widgets/wallet_app_b
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class WalletPage extends StatefulWidget {
   const WalletPage({super.key, this.biometricService});
@@ -359,13 +362,95 @@ class _SecurityCard extends StatefulWidget {
 }
 
 class _SecurityCardState extends State<_SecurityCard> {
+  static const _biometricEnabledKey = 'wallet_biometric_enabled';
+
+  final FlutterSecureStorage _storage = const FlutterSecureStorage();
   late bool _isBiometricEnabled = widget.isBiometricEnabled;
+  bool _hasStoredBiometricSetting = false;
+  bool _isSavingBiometricSetting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_loadBiometricSetting());
+  }
 
   @override
   void didUpdateWidget(covariant _SecurityCard oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.isBiometricEnabled != widget.isBiometricEnabled) {
+    if (!_hasStoredBiometricSetting &&
+        oldWidget.isBiometricEnabled != widget.isBiometricEnabled) {
       _isBiometricEnabled = widget.isBiometricEnabled;
+    }
+  }
+
+  Future<void> _loadBiometricSetting() async {
+    try {
+      final storedValue = await _storage.read(key: _biometricEnabledKey);
+      if (!mounted || _hasStoredBiometricSetting) {
+        return;
+      }
+
+      if (storedValue == 'true' || storedValue == 'false') {
+        setState(() {
+          _isBiometricEnabled = storedValue == 'true';
+          _hasStoredBiometricSetting = true;
+        });
+      }
+    } on PlatformException catch (error, stackTrace) {
+      _reportStorageError(
+        'Could not load biometric setting',
+        error,
+        stackTrace,
+      );
+    }
+  }
+
+  Future<void> _saveBiometricSetting(bool value) async {
+    if (_isSavingBiometricSetting) {
+      return;
+    }
+
+    setState(() => _isSavingBiometricSetting = true);
+    try {
+      await _storage.write(key: _biometricEnabledKey, value: value.toString());
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _isBiometricEnabled = value;
+        _hasStoredBiometricSetting = true;
+      });
+    } on PlatformException catch (error, stackTrace) {
+      _reportStorageError(
+        'Could not save biometric setting',
+        error,
+        stackTrace,
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isSavingBiometricSetting = false);
+      }
+    }
+  }
+
+  void _reportStorageError(
+    String message,
+    PlatformException error,
+    StackTrace stackTrace,
+  ) {
+    FlutterError.reportError(
+      FlutterErrorDetails(
+        exception: error,
+        stack: stackTrace,
+        library: 'wallet settings',
+        context: ErrorDescription(message),
+      ),
+    );
+    if (mounted) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(message)));
     }
   }
 
@@ -386,9 +471,7 @@ class _SecurityCardState extends State<_SecurityCard> {
             title: 'Use biometrics to approve transaction',
             trailing: _BiometricSwitch(
               value: _isBiometricEnabled,
-              onChanged: (value) {
-                setState(() => _isBiometricEnabled = value);
-              },
+              onChanged: (value) => unawaited(_saveBiometricSetting(value)),
             ),
           ),
           Divider(height: 1, color: AppTheme.dividerColor),
