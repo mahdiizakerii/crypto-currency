@@ -1,3 +1,4 @@
+import 'package:crypto_currency/core/utils/app_theme.dart';
 import 'package:crypto_currency/feature/login/presentation/screens/login_page.dart';
 import 'package:flutter/material.dart';
 
@@ -10,18 +11,9 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const backgroundColor = Color(0xFF080D3B);
-
     return MaterialApp(
       title: 'Crypto Currency',
-      theme: ThemeData(
-        brightness: Brightness.dark,
-        scaffoldBackgroundColor: backgroundColor,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF304BFF),
-          brightness: Brightness.dark,
-        ),
-      ),
+      theme: AppTheme.dark,
       home: const LoginPage(),
     );
   }
