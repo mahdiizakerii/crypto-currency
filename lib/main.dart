@@ -1,4 +1,5 @@
 import 'package:crypto_currency/core/utils/app_theme.dart';
+import 'package:crypto_currency/feature/login/bloc/login_bloc.dart';
 import 'package:crypto_currency/feature/wallet/presentation/bloc/wallet_bloc.dart';
 import 'package:crypto_currency/locator.dart';
 import 'package:crypto_currency/routes/app_routes.dart';
@@ -17,8 +18,11 @@ class CryptoCurrencyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<WalletBloc>.value(
-      value: locator<WalletBloc>(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<WalletBloc>.value(value: locator<WalletBloc>()),
+        BlocProvider<LoginBloc>(create: (_) => locator<LoginBloc>()),
+      ],
       child: MaterialApp(
         title: 'TonKeeper',
         debugShowCheckedModeBanner: false,

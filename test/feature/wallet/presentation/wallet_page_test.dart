@@ -1,4 +1,4 @@
-import 'package:crypto_currency/config/services/services/biometric_service.dart';
+import 'package:crypto_currency/config/biometric_service.dart';
 import 'package:crypto_currency/core/resources/data_state.dart';
 import 'package:crypto_currency/core/utils/app_theme.dart';
 import 'package:crypto_currency/feature/wallet/domain/entites/wallet_entities.dart';
