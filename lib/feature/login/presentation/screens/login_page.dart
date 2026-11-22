@@ -6,6 +6,7 @@ import 'package:crypto_currency/feature/login/presentation/bloc/login_state.dart
 import 'package:crypto_currency/feature/login/presentation/widgets/number.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -33,38 +34,45 @@ class _LoginPageState extends State<LoginPage> {
         systemNavigationBarColor: AppTheme.background,
         systemNavigationBarIconBrightness: Brightness.light,
       ),
-      child: StreamBuilder<LoginState>(
-        stream: _loginBloc.stream,
-        initialData: _loginBloc.state,
-        builder: (context, snapshot) {
-          final state = snapshot.data ?? _loginBloc.state;
-
-          return Scaffold(
-            body: SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(30, 0, 30, 28),
-                child: Column(
-                  children: [
-                    const SizedBox(height: 74),
-                    const _LoginIcon(),
-                    const SizedBox(height: 28),
-                    Text(
-                      'Enter Passcode',
-                      style: const TextStyle(
-                        color: AppTheme.textPrimary,
-                        fontSize: 24,
-                        fontWeight: FontWeight.w400,
+      child: BlocProvider.value(
+        value: _loginBloc,
+        child: BlocConsumer<LoginBloc, LoginState>(
+          listener: (context, state) {
+            if (state.passcode == '1111') {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const WalletPage()),
+              );
+            }
+          },
+          builder: (context, state) {
+            return Scaffold(
+              body: SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(30, 0, 30, 28),
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 74),
+                      const _LoginIcon(),
+                      const SizedBox(height: 28),
+                      const Text(
+                        'Enter Passcode',
+                        style: TextStyle(
+                          color: AppTheme.textPrimary,
+                          fontSize: 24,
+                          fontWeight: FontWeight.w400,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 25),
-                    _PasscodeIndicator(passcode: state.passcode),
-                    Expanded(child: NumberFiled(loginBloc: _loginBloc)),
-                  ],
+                      const SizedBox(height: 25),
+                      _PasscodeIndicator(passcode: state.passcode),
+                      Expanded(child: NumberFiled(loginBloc: _loginBloc)),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }
