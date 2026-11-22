@@ -48,14 +48,14 @@ class _WalletPageState extends State<WalletPage> {
       stateManagement: true,
       hideNavigationBarWhenKeyboardAppears: true,
       confineToSafeArea: true,
-      navBarHeight: AppTheme.navBarHeight,
+      navBarHeight: 68,
       navBarStyle: NavBarStyle.style6,
     );
   }
 
   PersistentBottomNavBarItem _navigationItem(IconData icon, String title) {
     return PersistentBottomNavBarItem(
-      icon: Icon(icon, size: AppTheme.navIconSize),
+      icon: Icon(icon),
       title: title,
       activeColorPrimary: AppTheme.primary,
       inactiveColorPrimary: AppTheme.textSecondary,
@@ -102,18 +102,18 @@ class _WalletDashboardPageState extends State<_WalletDashboardPage> {
                   : null;
 
               return ListView(
-                padding: AppTheme.walletPagePadding,
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
                 children: [
                   const _WalletHeader(),
-                  const SizedBox(height: AppTheme.space32),
+                  const SizedBox(height: 32),
                   _WalletBalance(wallet: wallet),
-                  const SizedBox(height: AppTheme.space26),
+                  const SizedBox(height: 26),
                   const _QuickActions(),
-                  const SizedBox(height: AppTheme.space28),
+                  const SizedBox(height: 28),
                   _SecurityCard(
                     isBiometricEnabled: wallet?.isBiometricEnabled ?? false,
                   ),
-                  const SizedBox(height: AppTheme.space28),
+                  const SizedBox(height: 28),
                   _AssetsSection(
                     assets: wallet?.assets ?? const [],
                     isLoading: isLoading,
@@ -140,24 +140,31 @@ class _WalletHeader extends StatelessWidget {
     return Row(
       children: [
         Container(
-          padding: AppTheme.walletHeaderPadding,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
           decoration: BoxDecoration(
             color: AppTheme.surface,
-            borderRadius: AppTheme.walletHeaderRadius,
+            borderRadius: BorderRadius.circular(24),
           ),
           child: const Row(
             children: [
               Icon(
                 Icons.account_balance_wallet_outlined,
-                size: AppTheme.walletHeaderIconSize,
+                size: 18,
                 color: AppTheme.textPrimary,
               ),
-              SizedBox(width: AppTheme.space8),
-              Text('Wallet', style: AppTheme.walletHeaderTextStyle),
-              SizedBox(width: AppTheme.space3),
+              SizedBox(width: 8),
+              Text(
+                'Wallet',
+                style: TextStyle(
+                  color: AppTheme.textPrimary,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              SizedBox(width: 3),
               Icon(
                 Icons.keyboard_arrow_down_rounded,
-                size: AppTheme.walletHeaderIconSize,
+                size: 18,
                 color: AppTheme.textSecondary,
               ),
             ],
@@ -168,7 +175,7 @@ class _WalletHeader extends StatelessWidget {
           icon: Icons.notifications_none_rounded,
           label: 'Notifications',
         ),
-        const SizedBox(width: AppTheme.space10),
+        const SizedBox(width: 10),
         _HeaderIconButton(icon: Icons.apps_rounded, label: 'More'),
       ],
     );
@@ -189,9 +196,9 @@ class _HeaderIconButton extends StatelessWidget {
       style: IconButton.styleFrom(
         backgroundColor: AppTheme.surface,
         foregroundColor: AppTheme.textPrimary,
-        fixedSize: AppTheme.headerButtonSize,
+        fixedSize: const Size(40, 40),
       ),
-      icon: Icon(icon, size: AppTheme.headerButtonIconSize),
+      icon: Icon(icon, size: 20),
     );
   }
 }
@@ -210,14 +217,19 @@ class _WalletBalance extends StatelessWidget {
       children: [
         Text(
           wallet == null ? '—' : _formatUsd(wallet!.totalBalanceUsd),
-          style: AppTheme.balanceTextStyle,
+          style: const TextStyle(
+            color: AppTheme.textPrimary,
+            fontSize: 34,
+            fontWeight: FontWeight.w600,
+            letterSpacing: -0.5,
+          ),
         ),
-        const SizedBox(height: AppTheme.space12),
+        const SizedBox(height: 12),
         Container(
-          padding: AppTheme.addressPadding,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
           decoration: BoxDecoration(
             color: AppTheme.surface,
-            borderRadius: AppTheme.addressRadius,
+            borderRadius: BorderRadius.circular(20),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -226,17 +238,29 @@ class _WalletBalance extends StatelessWidget {
                 address == null
                     ? 'Wallet address unavailable'
                     : 'Your address ${_shortAddress(address)}',
-                style: AppTheme.addressTextStyle,
+                style: const TextStyle(
+                  color: AppTheme.textSecondary,
+                  fontSize: 11,
+                ),
               ),
               if (walletType != null && walletType.isNotEmpty) ...[
-                const SizedBox(width: AppTheme.space8),
+                const SizedBox(width: 8),
                 Container(
-                  padding: AppTheme.walletTypePadding,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 7,
+                    vertical: 3,
+                  ),
                   decoration: BoxDecoration(
                     color: AppTheme.primary,
-                    borderRadius: AppTheme.walletTypeRadius,
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                  child: Text(walletType, style: AppTheme.walletTypeTextStyle),
+                  child: Text(
+                    walletType,
+                    style: const TextStyle(
+                      color: AppTheme.textPrimary,
+                      fontSize: 10,
+                    ),
+                  ),
                 ),
               ],
             ],
@@ -311,15 +335,15 @@ class _QuickAction extends StatelessWidget {
           label: label,
           child: Material(
             color: AppTheme.surface,
-            shape: AppTheme.keyShape,
+            shape: const CircleBorder(),
             child: InkWell(
-              customBorder: AppTheme.keyShape,
+              customBorder: const CircleBorder(),
               onTap: () {},
               child: Container(
-                width: AppTheme.actionButtonSize,
-                height: AppTheme.actionButtonSize,
+                width: 66,
+                height: 66,
                 decoration: BoxDecoration(
-                  shape: AppTheme.circleShape,
+                  shape: BoxShape.circle,
                   border: Border.all(color: AppTheme.primaryBorder),
                   gradient: const LinearGradient(
                     begin: Alignment.topLeft,
@@ -327,17 +351,16 @@ class _QuickAction extends StatelessWidget {
                     colors: [AppTheme.surfaceRaised, AppTheme.surface],
                   ),
                 ),
-                child: Icon(
-                  icon,
-                  color: AppTheme.textPrimary,
-                  size: AppTheme.actionIconSize,
-                ),
+                child: Icon(icon, color: AppTheme.textPrimary, size: 24),
               ),
             ),
           ),
         ),
-        const SizedBox(height: AppTheme.space8),
-        Text(label, style: AppTheme.actionTextStyle),
+        const SizedBox(height: 8),
+        Text(
+          label,
+          style: const TextStyle(color: AppTheme.textPrimary, fontSize: 12),
+        ),
       ],
     );
   }
@@ -351,10 +374,10 @@ class _SecurityCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: AppTheme.securityCardPadding,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       decoration: BoxDecoration(
         color: AppTheme.surface,
-        borderRadius: AppTheme.actionRadius,
+        borderRadius: BorderRadius.circular(18),
       ),
       child: Column(
         children: [
@@ -365,7 +388,7 @@ class _SecurityCard extends StatelessWidget {
             title: 'Use biometrics to approve transaction',
             trailing: _StaticSwitch(value: isBiometricEnabled),
           ),
-          Divider(height: AppTheme.dividerHeight, color: AppTheme.dividerColor),
+          Divider(height: 1, color: AppTheme.dividerColor),
           const _SecurityRow(
             icon: Icons.key_rounded,
             iconColor: AppTheme.warning,
@@ -400,25 +423,30 @@ class _SecurityRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: AppTheme.securityRowPadding,
+      padding: const EdgeInsets.symmetric(vertical: 10),
       child: Row(
         children: [
           Container(
-            width: AppTheme.securityIconSize,
-            height: AppTheme.securityIconSize,
+            width: 34,
+            height: 34,
             decoration: BoxDecoration(
               color: iconBackgroundColor,
-              shape: AppTheme.circleShape,
+              shape: BoxShape.circle,
             ),
-            child: Icon(
-              icon,
-              color: iconColor,
-              size: AppTheme.securityIconGlyphSize,
+            child: Icon(icon, color: iconColor, size: 19),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              title,
+              style: const TextStyle(
+                color: AppTheme.textPrimary,
+                fontSize: 11,
+                height: 1.25,
+              ),
             ),
           ),
-          const SizedBox(width: AppTheme.space10),
-          Expanded(child: Text(title, style: AppTheme.securityTextStyle)),
-          const SizedBox(width: AppTheme.space8),
+          const SizedBox(width: 8),
           trailing,
         ],
       ),
@@ -436,21 +464,21 @@ class _StaticSwitch extends StatelessWidget {
     return Semantics(
       label: 'Biometrics ${value ? 'on' : 'off'}',
       child: Container(
-        width: AppTheme.switchWidth,
-        height: AppTheme.switchHeight,
-        padding: AppTheme.switchPadding,
+        width: 34,
+        height: 20,
+        padding: const EdgeInsets.all(3),
         decoration: BoxDecoration(
           color: value ? AppTheme.primary : AppTheme.surfaceRaised,
-          borderRadius: AppTheme.switchRadius,
+          borderRadius: BorderRadius.circular(12),
         ),
         child: Align(
           alignment: value ? Alignment.centerRight : Alignment.centerLeft,
           child: Container(
-            width: AppTheme.switchThumbSize,
-            height: AppTheme.switchThumbSize,
-            decoration: BoxDecoration(
+            width: 14,
+            height: 14,
+            decoration: const BoxDecoration(
               color: AppTheme.textPrimary,
-              shape: AppTheme.circleShape,
+              shape: BoxShape.circle,
             ),
           ),
         ),
@@ -477,8 +505,15 @@ class _AssetsSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Assets', style: AppTheme.assetsTitleTextStyle),
-        const SizedBox(height: AppTheme.space12),
+        const Text(
+          'Assets',
+          style: TextStyle(
+            color: AppTheme.textPrimary,
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: 12),
         if (errorMessage != null)
           _WalletError(message: errorMessage!, onRetry: onRetry)
         else if (isLoading)
@@ -499,7 +534,7 @@ class _LoadingAssets extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const SizedBox(
-      height: AppTheme.loadingHeight,
+      height: 120,
       child: Center(child: CircularProgressIndicator(color: AppTheme.primary)),
     );
   }
@@ -514,28 +549,31 @@ class _WalletError extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: AppTheme.fullWidth,
-      padding: AppTheme.errorCardPadding,
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppTheme.surface,
-        borderRadius: AppTheme.actionRadius,
+        borderRadius: BorderRadius.circular(18),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
             'Could not load wallet',
-            style: AppTheme.errorTitleTextStyle,
+            style: TextStyle(
+              color: AppTheme.textPrimary,
+              fontWeight: FontWeight.w600,
+            ),
           ),
-          const SizedBox(height: AppTheme.space6),
-          Text(message, style: AppTheme.secondaryTextStyle),
-          const SizedBox(height: AppTheme.space12),
+          const SizedBox(height: 6),
+          Text(
+            message,
+            style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12),
+          ),
+          const SizedBox(height: 12),
           TextButton.icon(
             onPressed: onRetry,
-            icon: const Icon(
-              Icons.refresh_rounded,
-              size: AppTheme.errorIconSize,
-            ),
+            icon: const Icon(Icons.refresh_rounded, size: 18),
             label: const Text('Try again'),
           ),
         ],
@@ -550,26 +588,33 @@ class _EmptyAssets extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: AppTheme.fullWidth,
-      padding: AppTheme.emptyAssetsPadding,
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
       decoration: BoxDecoration(
         color: AppTheme.surface,
-        borderRadius: AppTheme.actionRadius,
+        borderRadius: BorderRadius.circular(18),
       ),
       child: const Column(
         children: [
           Icon(
             Icons.account_balance_wallet_outlined,
             color: AppTheme.textSecondary,
-            size: AppTheme.emptyIconSize,
+            size: 28,
           ),
-          SizedBox(height: AppTheme.space10),
-          Text('Your wallet is empty', style: AppTheme.emptyTitleTextStyle),
-          SizedBox(height: AppTheme.space5),
+          SizedBox(height: 10),
+          Text(
+            'Your wallet is empty',
+            style: TextStyle(
+              color: AppTheme.textPrimary,
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          SizedBox(height: 5),
           Text(
             'Your assets will appear here once they are added.',
             textAlign: TextAlign.center,
-            style: AppTheme.secondaryTextStyle,
+            style: TextStyle(color: AppTheme.textSecondary, fontSize: 12),
           ),
         ],
       ),
@@ -594,40 +639,56 @@ class _AssetTile extends StatelessWidget {
     final balance = _stringValue(asset['balance'] ?? asset['amount']);
 
     return Container(
-      margin: AppTheme.assetTileMargin,
-      padding: AppTheme.assetTilePadding,
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: AppTheme.surface,
-        borderRadius: AppTheme.assetTileRadius,
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
         children: [
           Container(
-            width: AppTheme.assetIconSize,
-            height: AppTheme.assetIconSize,
-            decoration: BoxDecoration(
+            width: 38,
+            height: 38,
+            decoration: const BoxDecoration(
               color: AppTheme.surfaceRaised,
-              shape: AppTheme.circleShape,
+              shape: BoxShape.circle,
             ),
             child: const Icon(
               Icons.token_outlined,
               color: AppTheme.textPrimary,
-              size: AppTheme.assetIconGlyphSize,
+              size: 20,
             ),
           ),
-          const SizedBox(width: AppTheme.space12),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: AppTheme.assetTitleTextStyle),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: AppTheme.textPrimary,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
                 if (symbol != null)
-                  Text(symbol, style: AppTheme.assetSymbolTextStyle),
+                  Text(
+                    symbol,
+                    style: const TextStyle(
+                      color: AppTheme.textSecondary,
+                      fontSize: 11,
+                    ),
+                  ),
               ],
             ),
           ),
           if (balance != null)
-            Text(balance, style: AppTheme.assetBalanceTextStyle),
+            Text(
+              balance,
+              style: const TextStyle(color: AppTheme.textPrimary, fontSize: 12),
+            ),
         ],
       ),
     );
@@ -652,7 +713,7 @@ class _ComingSoonPage extends StatelessWidget {
       body: Center(
         child: Text(
           '$title is coming soon',
-          style: AppTheme.comingSoonTextStyle,
+          style: const TextStyle(color: AppTheme.textSecondary),
         ),
       ),
     );
