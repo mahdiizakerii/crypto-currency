@@ -1,3 +1,4 @@
+import 'package:crypto_currency/core/utils/app_theme.dart';
 import 'package:crypto_currency/feature/login/presentation/bloc/login_bloc.dart';
 import 'package:crypto_currency/feature/login/presentation/bloc/login_event.dart';
 import 'package:crypto_currency/feature/login/presentation/widgets/key_button.dart';
@@ -10,54 +11,42 @@ class NumberFiled extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        const crossAxisSpacing = 24.0;
-        const mainAxisSpacing = 16.0;
-        final cellWidth = (constraints.maxWidth - 2 * crossAxisSpacing) / 3;
-        final cellHeight = (constraints.maxHeight - 3 * mainAxisSpacing) / 4;
-
-        return GridView.count(
-          padding: EdgeInsets.zero,
-          physics: const NeverScrollableScrollPhysics(),
-          crossAxisCount: 3,
-          crossAxisSpacing: crossAxisSpacing,
-          mainAxisSpacing: mainAxisSpacing,
-          childAspectRatio: cellWidth / cellHeight,
-          children: [
-            for (var digit = 1; digit <= 9; digit++)
-              _numberButton(digit.toString()),
-            const SizedBox.shrink(),
-            _numberButton('0'),
-            _deleteButton(),
-          ],
-        );
-      },
+    return GridView.count(
+      padding: AppTheme.noPadding,
+      physics: const NeverScrollableScrollPhysics(),
+      crossAxisCount: AppTheme.keypadColumns,
+      crossAxisSpacing: AppTheme.keypadColumnSpacing,
+      mainAxisSpacing: AppTheme.keypadRowSpacing,
+      childAspectRatio: AppTheme.keypadCellAspectRatio,
+      children: [
+        for (var digit = 1; digit <= 9; digit++)
+          _numberButton(context, digit.toString()),
+        const SizedBox.shrink(),
+        _numberButton(context, '0'),
+        _deleteButton(context),
+      ],
     );
   }
 
-  Widget _numberButton(String digit) {
+  Widget _numberButton(BuildContext context, String digit) {
     return KeyButton(
       key: ValueKey('digit-$digit'),
       label: 'Digit $digit',
       onPressed: () => loginBloc.add(LoginDigitPressed(digit)),
-      child: Text(
-        digit,
-        style: const TextStyle(
-          color: Color(0xFFF7F7FF),
-          fontSize: 32,
-          fontWeight: FontWeight.w400,
-        ),
-      ),
+      child: Text(digit, style: Theme.of(context).textTheme.headlineSmall),
     );
   }
 
-  Widget _deleteButton() {
+  Widget _deleteButton(BuildContext context) {
     return KeyButton(
       key: const ValueKey('delete-digit'),
       label: 'Delete last digit',
       onPressed: () => loginBloc.add(LoginDeletePressed()),
-      child: const Icon(Icons.backspace_rounded, color: Colors.white, size: 27),
+      child: Icon(
+        Icons.backspace_rounded,
+        color: Theme.of(context).colorScheme.onSurface,
+        size: AppTheme.deleteIconSize,
+      ),
     );
   }
 }

@@ -1,3 +1,4 @@
+import 'package:crypto_currency/core/utils/app_theme.dart';
 import 'package:flutter/material.dart';
 
 class KeyButton extends StatelessWidget {
@@ -18,10 +19,10 @@ class KeyButton extends StatelessWidget {
       button: true,
       label: label,
       child: Material(
-        color: const Color(0xFF10154C),
-        shape: const CircleBorder(),
+        color: Theme.of(context).colorScheme.surface,
+        shape: AppTheme.keyShape,
         child: InkWell(
-          customBorder: const CircleBorder(),
+          customBorder: AppTheme.keyShape,
           onTap: onPressed,
           child: Center(child: child),
         ),

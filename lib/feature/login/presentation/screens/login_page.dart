@@ -1,6 +1,6 @@
 import 'dart:async';
-import 'dart:math' as math;
 
+import 'package:crypto_currency/core/utils/app_theme.dart';
 import 'package:crypto_currency/feature/login/presentation/bloc/login_bloc.dart';
 import 'package:crypto_currency/feature/login/presentation/bloc/login_state.dart';
 import 'package:crypto_currency/feature/login/presentation/widgets/number.dart';
@@ -25,14 +25,12 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    const backgroundColor = Color(0xFF080D3B);
-
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
+        statusBarColor: AppTheme.statusBarColor,
         statusBarIconBrightness: Brightness.light,
         statusBarBrightness: Brightness.dark,
-        systemNavigationBarColor: backgroundColor,
+        systemNavigationBarColor: AppTheme.background,
         systemNavigationBarIconBrightness: Brightness.light,
       ),
       child: StreamBuilder<LoginState>(
@@ -44,42 +42,19 @@ class _LoginPageState extends State<LoginPage> {
           return Scaffold(
             body: SafeArea(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(30, 0, 30, 28),
+                padding: AppTheme.loginPagePadding,
                 child: Column(
                   children: [
-                    const SizedBox(height: 74),
+                    const SizedBox(height: AppTheme.pageTopSpacing),
                     const _LoginIcon(),
-                    const SizedBox(height: 28),
-                    const Text(
+                    const SizedBox(height: AppTheme.sectionSpacing),
+                    Text(
                       'Enter Passcode',
-                      style: TextStyle(
-                        color: Color(0xFFF7F7FF),
-                        fontSize: 24,
-                        fontWeight: FontWeight.w400,
-                      ),
+                      style: Theme.of(context).textTheme.titleLarge,
                     ),
-                    const SizedBox(height: 25),
+                    const SizedBox(height: AppTheme.titleBottomSpacing),
                     _PasscodeIndicator(passcode: state.passcode),
-                    Expanded(
-                      child: LayoutBuilder(
-                        builder: (context, constraints) {
-                          final padHeight = math.min(
-                            constraints.maxHeight,
-                            420.0,
-                          );
-
-                          return Column(
-                            children: [
-                              const Spacer(),
-                              SizedBox(
-                                height: padHeight,
-                                child: NumberFiled(loginBloc: _loginBloc),
-                              ),
-                            ],
-                          );
-                        },
-                      ),
-                    ),
+                    Expanded(child: NumberFiled(loginBloc: _loginBloc)),
                   ],
                 ),
               ),
@@ -97,16 +72,16 @@ class _LoginIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 44,
-      height: 44,
-      decoration: const BoxDecoration(
-        color: Color(0xFF304BFF),
-        shape: BoxShape.circle,
+      width: AppTheme.iconSize,
+      height: AppTheme.iconSize,
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.primary,
+        shape: AppTheme.circleShape,
       ),
-      child: const Icon(
+      child: Icon(
         Icons.lock_outline_rounded,
-        color: Colors.white,
-        size: 23,
+        color: Theme.of(context).colorScheme.onPrimary,
+        size: AppTheme.iconGlyphSize,
       ),
     );
   }
@@ -126,21 +101,25 @@ class _PasscodeIndicator extends StatelessWidget {
 
         return Padding(
           padding: EdgeInsets.only(
-            right: index == LoginState.passcodeLength - 1 ? 0 : 16,
+            right: index == LoginState.passcodeLength - 1
+                ? AppTheme.noSpacing
+                : AppTheme.passcodeDotSpacing,
           ),
           child: Semantics(
             label:
                 'Digit ${index + 1} ${isEntered ? 'entered' : 'not entered'}',
             child: Container(
               key: ValueKey('passcode-dot-$index'),
-              width: 24,
-              height: 24,
+              width: AppTheme.passcodeDotSize,
+              height: AppTheme.passcodeDotSize,
               decoration: BoxDecoration(
                 color: isEntered
-                    ? const Color(0xFF304BFF)
-                    : const Color(0xFF10154C),
-                shape: BoxShape.circle,
-                border: Border.all(color: const Color(0xFF263FC6)),
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).colorScheme.surface,
+                shape: AppTheme.circleShape,
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.outline,
+                ),
               ),
             ),
           ),
