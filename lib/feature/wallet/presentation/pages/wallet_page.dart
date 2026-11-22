@@ -1,3 +1,4 @@
+import 'package:crypto_currency/config/services/services/biometric_service.dart';
 import 'package:crypto_currency/core/utils/app_theme.dart';
 import 'package:crypto_currency/feature/wallet/domain/entites/wallet_entities.dart';
 import 'package:crypto_currency/feature/wallet/presentation/bloc/wallet_bloc.dart';
@@ -8,17 +9,109 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class WalletPage extends StatelessWidget {
-  const WalletPage({super.key});
+class WalletPage extends StatefulWidget {
+  const WalletPage({super.key, this.biometricService});
+
+  final BiometricService? biometricService;
+
+  @override
+  State<WalletPage> createState() => _WalletPageState();
+}
+
+class _WalletPageState extends State<WalletPage> with WidgetsBindingObserver {
+  late final BiometricService _biometricService;
+  bool _isAuthenticated = true;
+  bool _isAuthenticating = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _biometricService = widget.biometricService ?? BiometricService();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.inactive ||
+        state == AppLifecycleState.paused ||
+        state == AppLifecycleState.hidden) {
+      if (_isAuthenticated && !_isAuthenticating) {
+        setState(() => _isAuthenticated = false);
+      }
+    } else if (state == AppLifecycleState.resumed && !_isAuthenticated) {
+      _authenticate();
+    }
+  }
+
+  Future<void> _authenticate() async {
+    if (_isAuthenticated || _isAuthenticating) {
+      return;
+    }
+
+    setState(() => _isAuthenticating = true);
+    final isAuthenticated = await _biometricService.authenticate();
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _isAuthenticating = false;
+      _isAuthenticated = isAuthenticated;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    return const MainBottomNav(
-      screens: [
-        _WalletDashboardPage(),
-        _ComingSoonPage(title: 'Chart'),
-        _ComingSoonPage(title: 'News'),
-        _ComingSoonPage(title: 'Collectibles'),
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        ExcludeSemantics(
+          excluding: !_isAuthenticated,
+          child: IgnorePointer(
+            ignoring: !_isAuthenticated,
+            child: const MainBottomNav(
+              screens: [
+                _WalletDashboardPage(),
+                _ComingSoonPage(title: 'Chart'),
+                _ComingSoonPage(title: 'News'),
+                _ComingSoonPage(title: 'Collectibles'),
+              ],
+            ),
+          ),
+        ),
+        if (!_isAuthenticated)
+          ColoredBox(
+            color: AppTheme.background,
+            child: Center(
+              child: _isAuthenticating
+                  ? const CircularProgressIndicator(color: AppTheme.primary)
+                  : Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text(
+                          'Wallet locked',
+                          style: TextStyle(
+                            color: AppTheme.textPrimary,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        ElevatedButton.icon(
+                          onPressed: _authenticate,
+                          icon: const Icon(Icons.fingerprint),
+                          label: const Text('Unlock wallet'),
+                        ),
+                      ],
+                    ),
+            ),
+          ),
       ],
     );
   }

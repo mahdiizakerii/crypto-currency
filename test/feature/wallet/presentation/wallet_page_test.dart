@@ -1,3 +1,4 @@
+import 'package:crypto_currency/config/services/services/biometric_service.dart';
 import 'package:crypto_currency/core/resources/data_state.dart';
 import 'package:crypto_currency/core/utils/app_theme.dart';
 import 'package:crypto_currency/feature/wallet/domain/entites/wallet_entities.dart';
@@ -31,6 +32,33 @@ void main() {
     expect(find.text('News'), findsOneWidget);
     expect(find.text('Collectibles'), findsOneWidget);
   });
+
+  testWidgets('authenticates again when the app returns to the foreground', (
+    WidgetTester tester,
+  ) async {
+    final biometricService = _FakeBiometricService();
+
+    await tester.pumpWidget(
+      BlocProvider<WalletBloc>(
+        create: (_) => WalletBloc(GetWalletUseCase(_EmptyWalletRepository())),
+        child: MaterialApp(
+          theme: AppTheme.dark,
+          home: WalletPage(biometricService: biometricService),
+        ),
+      ),
+    );
+
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+    await tester.pump();
+    expect(find.text('Unlock wallet'), findsOneWidget);
+
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(biometricService.authenticationCount, 1);
+    expect(find.text('Your wallet is empty'), findsOneWidget);
+  });
 }
 
 class _EmptyWalletRepository extends WalletRepository {
@@ -48,5 +76,15 @@ class _EmptyWalletRepository extends WalletRepository {
         ),
       ),
     );
+  }
+}
+
+class _FakeBiometricService extends BiometricService {
+  int authenticationCount = 0;
+
+  @override
+  Future<bool> authenticate() async {
+    authenticationCount++;
+    return true;
   }
 }
