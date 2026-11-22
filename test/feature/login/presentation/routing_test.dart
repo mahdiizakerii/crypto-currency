@@ -1,5 +1,5 @@
 import 'package:crypto_currency/core/resources/data_state.dart';
-import 'package:crypto_currency/core/utils/app_router.dart';
+import 'package:crypto_currency/routes/app_routes.dart';
 import 'package:crypto_currency/feature/wallet/domain/entites/wallet_entities.dart';
 import 'package:crypto_currency/feature/wallet/domain/repository/wallet_repository.dart';
 import 'package:crypto_currency/feature/wallet/domain/use_cases/get_wallet_use_case.dart';
@@ -17,8 +17,7 @@ void main() {
         create: (_) => WalletBloc(GetWalletUseCase(_EmptyWalletRepository())),
         child: MaterialApp(
           initialRoute: AppRoutes.login,
-          onGenerateRoute: AppRouter.onGenerateRoute,
-          onUnknownRoute: AppRouter.onUnknownRoute,
+          routes: AppRoutes.routes,
         ),
       ),
     );

@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:crypto_currency/core/utils/app_router.dart';
+import 'package:crypto_currency/routes/app_routes.dart';
 import 'package:crypto_currency/feature/login/presentation/bloc/login_bloc.dart';
 import 'package:crypto_currency/feature/login/presentation/bloc/login_event.dart';
 import 'package:crypto_currency/feature/login/presentation/bloc/login_state.dart';
