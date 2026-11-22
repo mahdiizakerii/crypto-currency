@@ -1,3 +1,4 @@
+import 'package:crypto_currency/config/services/services/biometric_service.dart';
 import 'package:crypto_currency/core/resources/data_state.dart';
 import 'package:crypto_currency/core/utils/app_theme.dart';
 import 'package:crypto_currency/feature/wallet/domain/entites/wallet_entities.dart';
@@ -5,14 +6,18 @@ import 'package:crypto_currency/feature/wallet/domain/repository/wallet_reposito
 import 'package:crypto_currency/feature/wallet/domain/use_cases/get_wallet_use_case.dart';
 import 'package:crypto_currency/feature/wallet/presentation/bloc/wallet_bloc.dart';
 import 'package:crypto_currency/feature/wallet/presentation/pages/wallet_page.dart';
+import 'package:crypto_currency/feature/wallet/presentation/widgets/wallet_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('shows the empty wallet and persistent navigation tabs', (
     WidgetTester tester,
   ) async {
+    FlutterSecureStorage.setMockInitialValues({});
+
     await tester.pumpWidget(
       BlocProvider<WalletBloc>(
         create: (_) => WalletBloc(GetWalletUseCase(_EmptyWalletRepository())),
@@ -23,11 +28,64 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
 
     expect(find.text('Your wallet is empty'), findsOneWidget);
+    expect(find.byType(WalletAppBar), findsOneWidget);
     expect(find.text(r'$0.00'), findsOneWidget);
     expect(find.text('Chart'), findsOneWidget);
     expect(find.byIcon(Icons.show_chart_rounded), findsOneWidget);
     expect(find.text('News'), findsOneWidget);
     expect(find.text('Collectibles'), findsOneWidget);
+
+    await tester.tap(find.bySemanticsLabel('Send'));
+    await tester.pump();
+    expect(find.text('Your wallet is empty'), findsOneWidget);
+
+    expect(find.bySemanticsLabel('Biometrics off'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('biometric-switch')));
+    await tester.pump();
+    expect(find.bySemanticsLabel('Biometrics on'), findsOneWidget);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pumpWidget(
+      BlocProvider<WalletBloc>(
+        create: (_) => WalletBloc(GetWalletUseCase(_EmptyWalletRepository())),
+        child: MaterialApp(theme: AppTheme.dark, home: const WalletPage()),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.bySemanticsLabel('Biometrics on'), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('biometric-switch')));
+    await tester.pump();
+    expect(find.bySemanticsLabel('Biometrics off'), findsOneWidget);
+  });
+
+  testWidgets('authenticates again when the app returns to the foreground', (
+    WidgetTester tester,
+  ) async {
+    FlutterSecureStorage.setMockInitialValues({});
+    final biometricService = _FakeBiometricService();
+
+    await tester.pumpWidget(
+      BlocProvider<WalletBloc>(
+        create: (_) => WalletBloc(GetWalletUseCase(_EmptyWalletRepository())),
+        child: MaterialApp(
+          theme: AppTheme.dark,
+          home: WalletPage(biometricService: biometricService),
+        ),
+      ),
+    );
+
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+    await tester.pump();
+    expect(find.text('Unlock wallet'), findsOneWidget);
+
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(biometricService.authenticationCount, 1);
+    expect(find.text('Your wallet is empty'), findsOneWidget);
   });
 }
 
@@ -46,5 +104,15 @@ class _EmptyWalletRepository extends WalletRepository {
         ),
       ),
     );
+  }
+}
+
+class _FakeBiometricService extends BiometricService {
+  int authenticationCount = 0;
+
+  @override
+  Future<bool> authenticate() async {
+    authenticationCount++;
+    return true;
   }
 }

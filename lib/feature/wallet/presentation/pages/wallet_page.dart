@@ -1,64 +1,121 @@
+import 'dart:async';
+
+import 'package:crypto_currency/config/services/services/biometric_service.dart';
 import 'package:crypto_currency/core/utils/app_theme.dart';
 import 'package:crypto_currency/feature/wallet/domain/entites/wallet_entities.dart';
 import 'package:crypto_currency/feature/wallet/presentation/bloc/wallet_bloc.dart';
 import 'package:crypto_currency/feature/wallet/presentation/bloc/wallet_status.dart';
+import 'package:crypto_currency/feature/wallet/presentation/pages/main_bottom_nav.dart';
+import 'package:crypto_currency/feature/wallet/presentation/widgets/wallet_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class WalletPage extends StatefulWidget {
-  const WalletPage({super.key});
+  const WalletPage({super.key, this.biometricService});
+
+  final BiometricService? biometricService;
 
   @override
   State<WalletPage> createState() => _WalletPageState();
 }
 
-class _WalletPageState extends State<WalletPage> {
-  final PersistentTabController _controller = PersistentTabController(
-    initialIndex: 0,
-  );
+class _WalletPageState extends State<WalletPage> with WidgetsBindingObserver {
+  late final BiometricService _biometricService;
+  bool _isAuthenticated = true;
+  bool _isAuthenticating = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _biometricService = widget.biometricService ?? BiometricService();
+    WidgetsBinding.instance.addObserver(this);
+  }
 
   @override
   void dispose() {
-    _controller.dispose();
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
   @override
-  Widget build(BuildContext context) {
-    return PersistentTabView(
-      context,
-      controller: _controller,
-      screens: const [
-        _WalletDashboardPage(),
-        _ComingSoonPage(title: 'Chart'),
-        _ComingSoonPage(title: 'News'),
-        _ComingSoonPage(title: 'Collectibles'),
-      ],
-      items: [
-        _navigationItem(Icons.account_balance_wallet_outlined, 'Wallet'),
-        _navigationItem(Icons.show_chart_rounded, 'Chart'),
-        _navigationItem(Icons.article_outlined, 'News'),
-        _navigationItem(Icons.diamond_outlined, 'Collectibles'),
-      ],
-      backgroundColor: AppTheme.surface,
-      handleAndroidBackButtonPress: true,
-      resizeToAvoidBottomInset: true,
-      stateManagement: true,
-      hideNavigationBarWhenKeyboardAppears: true,
-      confineToSafeArea: true,
-      navBarHeight: 68,
-      navBarStyle: NavBarStyle.style6,
-    );
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.inactive ||
+        state == AppLifecycleState.paused ||
+        state == AppLifecycleState.hidden) {
+      if (_isAuthenticated && !_isAuthenticating) {
+        setState(() => _isAuthenticated = false);
+      }
+    } else if (state == AppLifecycleState.resumed && !_isAuthenticated) {
+      _authenticate();
+    }
   }
 
-  PersistentBottomNavBarItem _navigationItem(IconData icon, String title) {
-    return PersistentBottomNavBarItem(
-      icon: Icon(icon),
-      title: title,
-      activeColorPrimary: AppTheme.primary,
-      inactiveColorPrimary: AppTheme.textSecondary,
+  Future<void> _authenticate() async {
+    if (_isAuthenticated || _isAuthenticating) {
+      return;
+    }
+
+    setState(() => _isAuthenticating = true);
+    final isAuthenticated = await _biometricService.authenticate();
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _isAuthenticating = false;
+      _isAuthenticated = isAuthenticated;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        ExcludeSemantics(
+          excluding: !_isAuthenticated,
+          child: IgnorePointer(
+            ignoring: !_isAuthenticated,
+            child: const MainBottomNav(
+              screens: [
+                _WalletDashboardPage(),
+                _ComingSoonPage(title: 'Chart'),
+                _ComingSoonPage(title: 'News'),
+                _ComingSoonPage(title: 'Collectibles'),
+              ],
+            ),
+          ),
+        ),
+        if (!_isAuthenticated)
+          ColoredBox(
+            color: AppTheme.background,
+            child: Center(
+              child: _isAuthenticating
+                  ? const CircularProgressIndicator(color: AppTheme.primary)
+                  : Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text(
+                          'Wallet locked',
+                          style: TextStyle(
+                            color: AppTheme.textPrimary,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        ElevatedButton.icon(
+                          onPressed: _authenticate,
+                          icon: const Icon(Icons.fingerprint),
+                          label: const Text('Unlock wallet'),
+                        ),
+                      ],
+                    ),
+            ),
+          ),
+      ],
     );
   }
 }
@@ -88,6 +145,7 @@ class _WalletDashboardPageState extends State<_WalletDashboardPage> {
         systemNavigationBarIconBrightness: Brightness.light,
       ),
       child: Scaffold(
+        appBar: const WalletAppBar(),
         body: SafeArea(
           bottom: false,
           child: BlocBuilder<WalletBloc, WalletState>(
@@ -102,9 +160,8 @@ class _WalletDashboardPageState extends State<_WalletDashboardPage> {
                   : null;
 
               return ListView(
-                padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
                 children: [
-                  const _WalletHeader(),
                   const SizedBox(height: 32),
                   _WalletBalance(wallet: wallet),
                   const SizedBox(height: 26),
@@ -128,77 +185,6 @@ class _WalletDashboardPageState extends State<_WalletDashboardPage> {
           ),
         ),
       ),
-    );
-  }
-}
-
-class _WalletHeader extends StatelessWidget {
-  const _WalletHeader();
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
-          decoration: BoxDecoration(
-            color: AppTheme.surface,
-            borderRadius: BorderRadius.circular(24),
-          ),
-          child: const Row(
-            children: [
-              Icon(
-                Icons.account_balance_wallet_outlined,
-                size: 18,
-                color: AppTheme.textPrimary,
-              ),
-              SizedBox(width: 8),
-              Text(
-                'Wallet',
-                style: TextStyle(
-                  color: AppTheme.textPrimary,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              SizedBox(width: 3),
-              Icon(
-                Icons.keyboard_arrow_down_rounded,
-                size: 18,
-                color: AppTheme.textSecondary,
-              ),
-            ],
-          ),
-        ),
-        const Spacer(),
-        _HeaderIconButton(
-          icon: Icons.notifications_none_rounded,
-          label: 'Notifications',
-        ),
-        const SizedBox(width: 10),
-        _HeaderIconButton(icon: Icons.apps_rounded, label: 'More'),
-      ],
-    );
-  }
-}
-
-class _HeaderIconButton extends StatelessWidget {
-  const _HeaderIconButton({required this.icon, required this.label});
-
-  final IconData icon;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return IconButton(
-      tooltip: label,
-      onPressed: () {},
-      style: IconButton.styleFrom(
-        backgroundColor: AppTheme.surface,
-        foregroundColor: AppTheme.textPrimary,
-        fixedSize: const Size(40, 40),
-      ),
-      icon: Icon(icon, size: 20),
     );
   }
 }
@@ -366,10 +352,107 @@ class _QuickAction extends StatelessWidget {
   }
 }
 
-class _SecurityCard extends StatelessWidget {
+class _SecurityCard extends StatefulWidget {
   const _SecurityCard({required this.isBiometricEnabled});
 
   final bool isBiometricEnabled;
+
+  @override
+  State<_SecurityCard> createState() => _SecurityCardState();
+}
+
+class _SecurityCardState extends State<_SecurityCard> {
+  static const _biometricEnabledKey = 'wallet_biometric_enabled';
+
+  final FlutterSecureStorage _storage = const FlutterSecureStorage();
+  late bool _isBiometricEnabled = widget.isBiometricEnabled;
+  bool _hasStoredBiometricSetting = false;
+  bool _isSavingBiometricSetting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_loadBiometricSetting());
+  }
+
+  @override
+  void didUpdateWidget(covariant _SecurityCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!_hasStoredBiometricSetting &&
+        oldWidget.isBiometricEnabled != widget.isBiometricEnabled) {
+      _isBiometricEnabled = widget.isBiometricEnabled;
+    }
+  }
+
+  Future<void> _loadBiometricSetting() async {
+    try {
+      final storedValue = await _storage.read(key: _biometricEnabledKey);
+      if (!mounted || _hasStoredBiometricSetting) {
+        return;
+      }
+
+      if (storedValue == 'true' || storedValue == 'false') {
+        setState(() {
+          _isBiometricEnabled = storedValue == 'true';
+          _hasStoredBiometricSetting = true;
+        });
+      }
+    } on PlatformException catch (error, stackTrace) {
+      _reportStorageError(
+        'Could not load biometric setting',
+        error,
+        stackTrace,
+      );
+    }
+  }
+
+  Future<void> _saveBiometricSetting(bool value) async {
+    if (_isSavingBiometricSetting) {
+      return;
+    }
+
+    setState(() => _isSavingBiometricSetting = true);
+    try {
+      await _storage.write(key: _biometricEnabledKey, value: value.toString());
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _isBiometricEnabled = value;
+        _hasStoredBiometricSetting = true;
+      });
+    } on PlatformException catch (error, stackTrace) {
+      _reportStorageError(
+        'Could not save biometric setting',
+        error,
+        stackTrace,
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isSavingBiometricSetting = false);
+      }
+    }
+  }
+
+  void _reportStorageError(
+    String message,
+    PlatformException error,
+    StackTrace stackTrace,
+  ) {
+    FlutterError.reportError(
+      FlutterErrorDetails(
+        exception: error,
+        stack: stackTrace,
+        library: 'wallet settings',
+        context: ErrorDescription(message),
+      ),
+    );
+    if (mounted) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(message)));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -386,7 +469,10 @@ class _SecurityCard extends StatelessWidget {
             iconColor: AppTheme.positive,
             iconBackgroundColor: AppTheme.positiveIconBackground,
             title: 'Use biometrics to approve transaction',
-            trailing: _StaticSwitch(value: isBiometricEnabled),
+            trailing: _BiometricSwitch(
+              value: _isBiometricEnabled,
+              onChanged: (value) => unawaited(_saveBiometricSetting(value)),
+            ),
           ),
           Divider(height: 1, color: AppTheme.dividerColor),
           const _SecurityRow(
@@ -422,63 +508,80 @@ class _SecurityRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      child: Row(
-        children: [
-          Container(
-            width: 34,
-            height: 34,
-            decoration: BoxDecoration(
-              color: iconBackgroundColor,
-              shape: BoxShape.circle,
+    return InkWell(
+      onTap: () {},
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        child: Row(
+          children: [
+            Container(
+              width: 34,
+              height: 34,
+              decoration: BoxDecoration(
+                color: iconBackgroundColor,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: iconColor, size: 19),
             ),
-            child: Icon(icon, color: iconColor, size: 19),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              title,
-              style: const TextStyle(
-                color: AppTheme.textPrimary,
-                fontSize: 11,
-                height: 1.25,
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                title,
+                style: const TextStyle(
+                  color: AppTheme.textPrimary,
+                  fontSize: 11,
+                  height: 1.25,
+                ),
               ),
             ),
-          ),
-          const SizedBox(width: 8),
-          trailing,
-        ],
+            const SizedBox(width: 8),
+            trailing,
+          ],
+        ),
       ),
     );
   }
 }
 
-class _StaticSwitch extends StatelessWidget {
-  const _StaticSwitch({required this.value});
+class _BiometricSwitch extends StatelessWidget {
+  const _BiometricSwitch({required this.value, required this.onChanged});
 
   final bool value;
+  final ValueChanged<bool> onChanged;
 
   @override
   Widget build(BuildContext context) {
     return Semantics(
       label: 'Biometrics ${value ? 'on' : 'off'}',
-      child: Container(
-        width: 34,
-        height: 20,
-        padding: const EdgeInsets.all(3),
-        decoration: BoxDecoration(
-          color: value ? AppTheme.primary : AppTheme.surfaceRaised,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Align(
-          alignment: value ? Alignment.centerRight : Alignment.centerLeft,
-          child: Container(
-            width: 14,
-            height: 14,
-            decoration: const BoxDecoration(
-              color: AppTheme.textPrimary,
-              shape: BoxShape.circle,
+      toggled: value,
+      button: true,
+      child: SizedBox(
+        width: 48,
+        height: 48,
+        child: InkWell(
+          key: const ValueKey('biometric-switch'),
+          borderRadius: BorderRadius.circular(24),
+          onTap: () => onChanged(!value),
+          child: Center(
+            child: Container(
+              width: 34,
+              height: 20,
+              padding: const EdgeInsets.all(3),
+              decoration: BoxDecoration(
+                color: value ? AppTheme.primary : AppTheme.surfaceRaised,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Align(
+                alignment: value ? Alignment.centerRight : Alignment.centerLeft,
+                child: Container(
+                  width: 14,
+                  height: 14,
+                  decoration: const BoxDecoration(
+                    color: AppTheme.textPrimary,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
             ),
           ),
         ),
