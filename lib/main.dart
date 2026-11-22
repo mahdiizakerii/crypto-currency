@@ -1,9 +1,14 @@
+<<<<<<< HEAD
 import 'package:tonkeeper/feature/wallet/presentation/bloc/wallet_bloc.dart';
 import 'package:tonkeeper/feature/wallet/presentation/bloc/wallet_status.dart';
 import 'package:tonkeeper/locator.dart';
+=======
+import 'package:crypto_currency/feature/login/presentation/pages/login_page.dart';
+>>>>>>> feature/login
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+<<<<<<< HEAD
 void main() async {
   setup();
   runApp(
@@ -56,6 +61,30 @@ class _MainState extends State<Main> {
           },
         ),
       ),
+=======
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    const backgroundColor = Color(0xFF080D3B);
+
+    return MaterialApp(
+      title: 'Crypto Currency',
+      theme: ThemeData(
+        brightness: Brightness.dark,
+        scaffoldBackgroundColor: backgroundColor,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF304BFF),
+          brightness: Brightness.dark,
+        ),
+      ),
+      home: const LoginPage(),
+>>>>>>> feature/login
     );
   }
 }
