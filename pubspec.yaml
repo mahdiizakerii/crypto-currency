@@ -1,4 +1,4 @@
-name: tonkeeper
+name: crypto_currency
 description: "A new Flutter project."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -34,18 +34,12 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
-<<<<<<< HEAD
   dio: ^5.11.1
   equatable: ^3.0.0
   flutter_bloc: ^9.1.1
   get_it: ^9.3.0
-<<<<<<< HEAD
-=======
   bloc: ^9.2.1
->>>>>>> feature/login
-=======
   persistent_bottom_nav_bar: ^6.2.1
->>>>>>> feature/wallet
 
 dev_dependencies:
   flutter_test:

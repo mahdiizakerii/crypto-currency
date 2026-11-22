@@ -1,6 +1,6 @@
 // ignore_for_file: must_be_immutable, invalid_annotation_target
 
-import 'package:tonkeeper/feature/wallet/domain/entites/wallet_entities.dart';
+import 'package:crypto_currency/feature/wallet/domain/entites/wallet_entities.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 

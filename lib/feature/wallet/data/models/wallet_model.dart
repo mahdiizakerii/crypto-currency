@@ -1,4 +1,4 @@
-import 'package:tonkeeper/feature/wallet/domain/entites/wallet_entities.dart';
+import 'package:crypto_currency/feature/wallet/domain/entites/wallet_entities.dart';
 
 class WalletModel extends WalletEntities {
   const WalletModel({required super.success, required super.data});

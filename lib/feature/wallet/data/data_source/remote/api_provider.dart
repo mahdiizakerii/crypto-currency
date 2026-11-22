@@ -1,5 +1,5 @@
-import 'package:tonkeeper/core/utils/constants.dart';
-import 'package:tonkeeper/feature/wallet/data/models/wallet_model.dart';
+import 'package:crypto_currency/core/utils/constants.dart';
+import 'package:crypto_currency/feature/wallet/data/models/wallet_model.dart';
 import 'package:dio/dio.dart';
 
 class ApiProvider {

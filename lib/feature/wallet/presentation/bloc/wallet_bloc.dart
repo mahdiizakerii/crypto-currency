@@ -1,6 +1,6 @@
-import 'package:tonkeeper/core/resources/data_state.dart';
-import 'package:tonkeeper/feature/wallet/domain/use_cases/get_wallet_use_case.dart';
-import 'package:tonkeeper/feature/wallet/presentation/bloc/wallet_status.dart';
+import 'package:crypto_currency/core/resources/data_state.dart';
+import 'package:crypto_currency/feature/wallet/domain/use_cases/get_wallet_use_case.dart';
+import 'package:crypto_currency/feature/wallet/presentation/bloc/wallet_status.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

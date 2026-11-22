@@ -1,7 +1,7 @@
-import 'package:tonkeeper/core/resources/data_state.dart';
-import 'package:tonkeeper/feature/wallet/data/data_source/remote/api_provider.dart';
-import 'package:tonkeeper/feature/wallet/domain/entites/wallet_entities.dart';
-import 'package:tonkeeper/feature/wallet/domain/repository/wallet_repository.dart';
+import 'package:crypto_currency/core/resources/data_state.dart';
+import 'package:crypto_currency/feature/wallet/data/data_source/remote/api_provider.dart';
+import 'package:crypto_currency/feature/wallet/domain/entites/wallet_entities.dart';
+import 'package:crypto_currency/feature/wallet/domain/repository/wallet_repository.dart';
 import 'package:dio/dio.dart';
 
 class WalletRepositoryImpl extends WalletRepository {
