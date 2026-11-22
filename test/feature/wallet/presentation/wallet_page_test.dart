@@ -31,6 +31,19 @@ void main() {
     expect(find.byIcon(Icons.show_chart_rounded), findsOneWidget);
     expect(find.text('News'), findsOneWidget);
     expect(find.text('Collectibles'), findsOneWidget);
+
+    await tester.tap(find.bySemanticsLabel('Send'));
+    await tester.pump();
+    expect(find.text('Your wallet is empty'), findsOneWidget);
+
+    expect(find.bySemanticsLabel('Biometrics off'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('biometric-switch')));
+    await tester.pump();
+    expect(find.bySemanticsLabel('Biometrics on'), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('biometric-switch')));
+    await tester.pump();
+    expect(find.bySemanticsLabel('Biometrics off'), findsOneWidget);
   });
 
   testWidgets('authenticates again when the app returns to the foreground', (

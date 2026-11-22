@@ -349,10 +349,25 @@ class _QuickAction extends StatelessWidget {
   }
 }
 
-class _SecurityCard extends StatelessWidget {
+class _SecurityCard extends StatefulWidget {
   const _SecurityCard({required this.isBiometricEnabled});
 
   final bool isBiometricEnabled;
+
+  @override
+  State<_SecurityCard> createState() => _SecurityCardState();
+}
+
+class _SecurityCardState extends State<_SecurityCard> {
+  late bool _isBiometricEnabled = widget.isBiometricEnabled;
+
+  @override
+  void didUpdateWidget(covariant _SecurityCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.isBiometricEnabled != widget.isBiometricEnabled) {
+      _isBiometricEnabled = widget.isBiometricEnabled;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -369,7 +384,12 @@ class _SecurityCard extends StatelessWidget {
             iconColor: AppTheme.positive,
             iconBackgroundColor: AppTheme.positiveIconBackground,
             title: 'Use biometrics to approve transaction',
-            trailing: _StaticSwitch(value: isBiometricEnabled),
+            trailing: _BiometricSwitch(
+              value: _isBiometricEnabled,
+              onChanged: (value) {
+                setState(() => _isBiometricEnabled = value);
+              },
+            ),
           ),
           Divider(height: 1, color: AppTheme.dividerColor),
           const _SecurityRow(
@@ -405,63 +425,80 @@ class _SecurityRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      child: Row(
-        children: [
-          Container(
-            width: 34,
-            height: 34,
-            decoration: BoxDecoration(
-              color: iconBackgroundColor,
-              shape: BoxShape.circle,
+    return InkWell(
+      onTap: () {},
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        child: Row(
+          children: [
+            Container(
+              width: 34,
+              height: 34,
+              decoration: BoxDecoration(
+                color: iconBackgroundColor,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: iconColor, size: 19),
             ),
-            child: Icon(icon, color: iconColor, size: 19),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              title,
-              style: const TextStyle(
-                color: AppTheme.textPrimary,
-                fontSize: 11,
-                height: 1.25,
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                title,
+                style: const TextStyle(
+                  color: AppTheme.textPrimary,
+                  fontSize: 11,
+                  height: 1.25,
+                ),
               ),
             ),
-          ),
-          const SizedBox(width: 8),
-          trailing,
-        ],
+            const SizedBox(width: 8),
+            trailing,
+          ],
+        ),
       ),
     );
   }
 }
 
-class _StaticSwitch extends StatelessWidget {
-  const _StaticSwitch({required this.value});
+class _BiometricSwitch extends StatelessWidget {
+  const _BiometricSwitch({required this.value, required this.onChanged});
 
   final bool value;
+  final ValueChanged<bool> onChanged;
 
   @override
   Widget build(BuildContext context) {
     return Semantics(
       label: 'Biometrics ${value ? 'on' : 'off'}',
-      child: Container(
-        width: 34,
-        height: 20,
-        padding: const EdgeInsets.all(3),
-        decoration: BoxDecoration(
-          color: value ? AppTheme.primary : AppTheme.surfaceRaised,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Align(
-          alignment: value ? Alignment.centerRight : Alignment.centerLeft,
-          child: Container(
-            width: 14,
-            height: 14,
-            decoration: const BoxDecoration(
-              color: AppTheme.textPrimary,
-              shape: BoxShape.circle,
+      toggled: value,
+      button: true,
+      child: SizedBox(
+        width: 48,
+        height: 48,
+        child: InkWell(
+          key: const ValueKey('biometric-switch'),
+          borderRadius: BorderRadius.circular(24),
+          onTap: () => onChanged(!value),
+          child: Center(
+            child: Container(
+              width: 34,
+              height: 20,
+              padding: const EdgeInsets.all(3),
+              decoration: BoxDecoration(
+                color: value ? AppTheme.primary : AppTheme.surfaceRaised,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Align(
+                alignment: value ? Alignment.centerRight : Alignment.centerLeft,
+                child: Container(
+                  width: 14,
+                  height: 14,
+                  decoration: const BoxDecoration(
+                    color: AppTheme.textPrimary,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
             ),
           ),
         ),
