@@ -1,11 +1,13 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:crypto_currency/core/utils/app_router.dart';
 import 'package:crypto_currency/feature/login/presentation/bloc/login_bloc.dart';
 import 'package:crypto_currency/feature/login/presentation/bloc/login_event.dart';
 import 'package:crypto_currency/feature/login/presentation/bloc/login_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -27,65 +29,73 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     const backgroundColor = Color(0xFF080D3B);
 
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: const SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.light,
-        statusBarBrightness: Brightness.dark,
-        systemNavigationBarColor: backgroundColor,
-        systemNavigationBarIconBrightness: Brightness.light,
-      ),
-      child: StreamBuilder<LoginState>(
-        stream: _loginBloc.stream,
-        initialData: _loginBloc.state,
-        builder: (context, snapshot) {
-          final state = snapshot.data ?? _loginBloc.state;
+    return BlocListener<LoginBloc, LoginState>(
+      bloc: _loginBloc,
+      listener: (context, state) {
+        if (state.passcode.length == LoginState.passcodeLength) {
+          Navigator.of(context).pushReplacementNamed(AppRoutes.wallet);
+        }
+      },
+      child: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: const SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.light,
+          statusBarBrightness: Brightness.dark,
+          systemNavigationBarColor: backgroundColor,
+          systemNavigationBarIconBrightness: Brightness.light,
+        ),
+        child: StreamBuilder<LoginState>(
+          stream: _loginBloc.stream,
+          initialData: _loginBloc.state,
+          builder: (context, snapshot) {
+            final state = snapshot.data ?? _loginBloc.state;
 
-          return Scaffold(
-            body: SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(30, 0, 30, 28),
-                child: Column(
-                  children: [
-                    const SizedBox(height: 74),
-                    const _LoginIcon(),
-                    const SizedBox(height: 28),
-                    const Text(
-                      'Enter Passcode',
-                      style: TextStyle(
-                        color: Color(0xFFF7F7FF),
-                        fontSize: 24,
-                        fontWeight: FontWeight.w400,
+            return Scaffold(
+              body: SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(30, 0, 30, 28),
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 74),
+                      const _LoginIcon(),
+                      const SizedBox(height: 28),
+                      const Text(
+                        'Enter Passcode',
+                        style: TextStyle(
+                          color: Color(0xFFF7F7FF),
+                          fontSize: 24,
+                          fontWeight: FontWeight.w400,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 25),
-                    _PasscodeIndicator(passcode: state.passcode),
-                    Expanded(
-                      child: LayoutBuilder(
-                        builder: (context, constraints) {
-                          final padHeight = math.min(
-                            constraints.maxHeight,
-                            420.0,
-                          );
+                      const SizedBox(height: 25),
+                      _PasscodeIndicator(passcode: state.passcode),
+                      Expanded(
+                        child: LayoutBuilder(
+                          builder: (context, constraints) {
+                            final padHeight = math.min(
+                              constraints.maxHeight,
+                              420.0,
+                            );
 
-                          return Column(
-                            children: [
-                              const Spacer(),
-                              SizedBox(
-                                height: padHeight,
-                                child: _NumberPad(loginBloc: _loginBloc),
-                              ),
-                            ],
-                          );
-                        },
+                            return Column(
+                              children: [
+                                const Spacer(),
+                                SizedBox(
+                                  height: padHeight,
+                                  child: _NumberPad(loginBloc: _loginBloc),
+                                ),
+                              ],
+                            );
+                          },
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }
