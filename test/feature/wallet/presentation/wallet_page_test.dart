@@ -5,6 +5,7 @@ import 'package:crypto_currency/feature/wallet/domain/repository/wallet_reposito
 import 'package:crypto_currency/feature/wallet/domain/use_cases/get_wallet_use_case.dart';
 import 'package:crypto_currency/feature/wallet/presentation/bloc/wallet_bloc.dart';
 import 'package:crypto_currency/feature/wallet/presentation/pages/wallet_page.dart';
+import 'package:crypto_currency/feature/wallet/presentation/widgets/wallet_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -23,6 +24,7 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
 
     expect(find.text('Your wallet is empty'), findsOneWidget);
+    expect(find.byType(WalletAppBar), findsOneWidget);
     expect(find.text(r'$0.00'), findsOneWidget);
     expect(find.text('Chart'), findsOneWidget);
     expect(find.byIcon(Icons.show_chart_rounded), findsOneWidget);

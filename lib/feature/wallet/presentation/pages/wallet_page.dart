@@ -2,63 +2,24 @@ import 'package:crypto_currency/core/utils/app_theme.dart';
 import 'package:crypto_currency/feature/wallet/domain/entites/wallet_entities.dart';
 import 'package:crypto_currency/feature/wallet/presentation/bloc/wallet_bloc.dart';
 import 'package:crypto_currency/feature/wallet/presentation/bloc/wallet_status.dart';
+import 'package:crypto_currency/feature/wallet/presentation/pages/main_bottom_nav.dart';
+import 'package:crypto_currency/feature/wallet/presentation/widgets/wallet_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 
-class WalletPage extends StatefulWidget {
+class WalletPage extends StatelessWidget {
   const WalletPage({super.key});
 
   @override
-  State<WalletPage> createState() => _WalletPageState();
-}
-
-class _WalletPageState extends State<WalletPage> {
-  final PersistentTabController _controller = PersistentTabController(
-    initialIndex: 0,
-  );
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return PersistentTabView(
-      context,
-      controller: _controller,
-      screens: const [
+    return const MainBottomNav(
+      screens: [
         _WalletDashboardPage(),
         _ComingSoonPage(title: 'Chart'),
         _ComingSoonPage(title: 'News'),
         _ComingSoonPage(title: 'Collectibles'),
       ],
-      items: [
-        _navigationItem(Icons.account_balance_wallet_outlined, 'Wallet'),
-        _navigationItem(Icons.show_chart_rounded, 'Chart'),
-        _navigationItem(Icons.article_outlined, 'News'),
-        _navigationItem(Icons.diamond_outlined, 'Collectibles'),
-      ],
-      backgroundColor: AppTheme.surface,
-      handleAndroidBackButtonPress: true,
-      resizeToAvoidBottomInset: true,
-      stateManagement: true,
-      hideNavigationBarWhenKeyboardAppears: true,
-      confineToSafeArea: true,
-      navBarHeight: 68,
-      navBarStyle: NavBarStyle.style6,
-    );
-  }
-
-  PersistentBottomNavBarItem _navigationItem(IconData icon, String title) {
-    return PersistentBottomNavBarItem(
-      icon: Icon(icon),
-      title: title,
-      activeColorPrimary: AppTheme.primary,
-      inactiveColorPrimary: AppTheme.textSecondary,
     );
   }
 }
@@ -88,6 +49,7 @@ class _WalletDashboardPageState extends State<_WalletDashboardPage> {
         systemNavigationBarIconBrightness: Brightness.light,
       ),
       child: Scaffold(
+        appBar: const WalletAppBar(),
         body: SafeArea(
           bottom: false,
           child: BlocBuilder<WalletBloc, WalletState>(
@@ -102,9 +64,8 @@ class _WalletDashboardPageState extends State<_WalletDashboardPage> {
                   : null;
 
               return ListView(
-                padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
                 children: [
-                  const _WalletHeader(),
                   const SizedBox(height: 32),
                   _WalletBalance(wallet: wallet),
                   const SizedBox(height: 26),
@@ -128,77 +89,6 @@ class _WalletDashboardPageState extends State<_WalletDashboardPage> {
           ),
         ),
       ),
-    );
-  }
-}
-
-class _WalletHeader extends StatelessWidget {
-  const _WalletHeader();
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
-          decoration: BoxDecoration(
-            color: AppTheme.surface,
-            borderRadius: BorderRadius.circular(24),
-          ),
-          child: const Row(
-            children: [
-              Icon(
-                Icons.account_balance_wallet_outlined,
-                size: 18,
-                color: AppTheme.textPrimary,
-              ),
-              SizedBox(width: 8),
-              Text(
-                'Wallet',
-                style: TextStyle(
-                  color: AppTheme.textPrimary,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              SizedBox(width: 3),
-              Icon(
-                Icons.keyboard_arrow_down_rounded,
-                size: 18,
-                color: AppTheme.textSecondary,
-              ),
-            ],
-          ),
-        ),
-        const Spacer(),
-        _HeaderIconButton(
-          icon: Icons.notifications_none_rounded,
-          label: 'Notifications',
-        ),
-        const SizedBox(width: 10),
-        _HeaderIconButton(icon: Icons.apps_rounded, label: 'More'),
-      ],
-    );
-  }
-}
-
-class _HeaderIconButton extends StatelessWidget {
-  const _HeaderIconButton({required this.icon, required this.label});
-
-  final IconData icon;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return IconButton(
-      tooltip: label,
-      onPressed: () {},
-      style: IconButton.styleFrom(
-        backgroundColor: AppTheme.surface,
-        foregroundColor: AppTheme.textPrimary,
-        fixedSize: const Size(40, 40),
-      ),
-      icon: Icon(icon, size: 20),
     );
   }
 }
