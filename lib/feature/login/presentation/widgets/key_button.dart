@@ -19,10 +19,10 @@ class KeyButton extends StatelessWidget {
       button: true,
       label: label,
       child: Material(
-        color: Theme.of(context).colorScheme.surface,
-        shape: AppTheme.keyShape,
+        color: AppTheme.surface,
+        shape: const CircleBorder(),
         child: InkWell(
-          customBorder: AppTheme.keyShape,
+          customBorder: const CircleBorder(),
           onTap: onPressed,
           child: Center(child: child),
         ),

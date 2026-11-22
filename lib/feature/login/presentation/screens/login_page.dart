@@ -42,17 +42,21 @@ class _LoginPageState extends State<LoginPage> {
           return Scaffold(
             body: SafeArea(
               child: Padding(
-                padding: AppTheme.loginPagePadding,
+                padding: const EdgeInsets.fromLTRB(30, 0, 30, 28),
                 child: Column(
                   children: [
-                    const SizedBox(height: AppTheme.pageTopSpacing),
+                    const SizedBox(height: 74),
                     const _LoginIcon(),
-                    const SizedBox(height: AppTheme.sectionSpacing),
+                    const SizedBox(height: 28),
                     Text(
                       'Enter Passcode',
-                      style: Theme.of(context).textTheme.titleLarge,
+                      style: const TextStyle(
+                        color: AppTheme.textPrimary,
+                        fontSize: 24,
+                        fontWeight: FontWeight.w400,
+                      ),
                     ),
-                    const SizedBox(height: AppTheme.titleBottomSpacing),
+                    const SizedBox(height: 25),
                     _PasscodeIndicator(passcode: state.passcode),
                     Expanded(child: NumberFiled(loginBloc: _loginBloc)),
                   ],
@@ -72,16 +76,16 @@ class _LoginIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: AppTheme.iconSize,
-      height: AppTheme.iconSize,
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primary,
-        shape: AppTheme.circleShape,
+      width: 44,
+      height: 44,
+      decoration: const BoxDecoration(
+        color: AppTheme.primary,
+        shape: BoxShape.circle,
       ),
-      child: Icon(
+      child: const Icon(
         Icons.lock_outline_rounded,
-        color: Theme.of(context).colorScheme.onPrimary,
-        size: AppTheme.iconGlyphSize,
+        color: AppTheme.textPrimary,
+        size: 23,
       ),
     );
   }
@@ -101,25 +105,19 @@ class _PasscodeIndicator extends StatelessWidget {
 
         return Padding(
           padding: EdgeInsets.only(
-            right: index == LoginState.passcodeLength - 1
-                ? AppTheme.noSpacing
-                : AppTheme.passcodeDotSpacing,
+            right: index == LoginState.passcodeLength - 1 ? 0 : 16,
           ),
           child: Semantics(
             label:
                 'Digit ${index + 1} ${isEntered ? 'entered' : 'not entered'}',
             child: Container(
               key: ValueKey('passcode-dot-$index'),
-              width: AppTheme.passcodeDotSize,
-              height: AppTheme.passcodeDotSize,
+              width: 24,
+              height: 24,
               decoration: BoxDecoration(
-                color: isEntered
-                    ? Theme.of(context).colorScheme.primary
-                    : Theme.of(context).colorScheme.surface,
-                shape: AppTheme.circleShape,
-                border: Border.all(
-                  color: Theme.of(context).colorScheme.outline,
-                ),
+                color: isEntered ? AppTheme.primary : AppTheme.surface,
+                shape: BoxShape.circle,
+                border: Border.all(color: AppTheme.border),
               ),
             ),
           ),
