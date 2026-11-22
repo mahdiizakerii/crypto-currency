@@ -11,7 +11,11 @@ GetIt locator = GetIt.instance;
 void setup() {
   // rest api
   locator.registerSingleton<ApiProvider>(
-    ApiProvider(authorization: Constants.walletAuthorization),
+    ApiProvider(
+      authorization: Constants.walletAuthorization.isEmpty
+          ? null
+          : Constants.walletAuthorization,
+    ),
   );
   locator.registerSingleton<WalletRepository>(
     WalletRepositoryImpl(locator<ApiProvider>()),

@@ -39,9 +39,13 @@ dependencies:
   equatable: ^3.0.0
   flutter_bloc: ^9.1.1
   get_it: ^9.3.0
+<<<<<<< HEAD
 =======
   bloc: ^9.2.1
 >>>>>>> feature/login
+=======
+  persistent_bottom_nav_bar: ^6.2.1
+>>>>>>> feature/wallet
 
 dev_dependencies:
   flutter_test:
