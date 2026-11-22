@@ -1,4 +1,4 @@
-import 'package:crypto_currency/feature/login/presentation/pages/login_page.dart';
+import 'package:crypto_currency/feature/login/presentation/screens/login_page.dart';
 import 'package:flutter/material.dart';
 
 void main() {

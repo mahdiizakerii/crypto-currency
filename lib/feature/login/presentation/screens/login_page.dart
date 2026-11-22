@@ -2,8 +2,8 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:crypto_currency/feature/login/presentation/bloc/login_bloc.dart';
-import 'package:crypto_currency/feature/login/presentation/bloc/login_event.dart';
 import 'package:crypto_currency/feature/login/presentation/bloc/login_state.dart';
+import 'package:crypto_currency/feature/login/presentation/widgets/number.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -73,7 +73,7 @@ class _LoginPageState extends State<LoginPage> {
                               const Spacer(),
                               SizedBox(
                                 height: padHeight,
-                                child: _NumberPad(loginBloc: _loginBloc),
+                                child: NumberFiled(loginBloc: _loginBloc),
                               ),
                             ],
                           );
@@ -146,95 +146,6 @@ class _PasscodeIndicator extends StatelessWidget {
           ),
         );
       }),
-    );
-  }
-}
-
-class _NumberPad extends StatelessWidget {
-  const _NumberPad({required this.loginBloc});
-
-  final LoginBloc loginBloc;
-
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        const crossAxisSpacing = 24.0;
-        const mainAxisSpacing = 16.0;
-        final cellWidth = (constraints.maxWidth - 2 * crossAxisSpacing) / 3;
-        final cellHeight = (constraints.maxHeight - 3 * mainAxisSpacing) / 4;
-
-        return GridView.count(
-          padding: EdgeInsets.zero,
-          physics: const NeverScrollableScrollPhysics(),
-          crossAxisCount: 3,
-          crossAxisSpacing: crossAxisSpacing,
-          mainAxisSpacing: mainAxisSpacing,
-          childAspectRatio: cellWidth / cellHeight,
-          children: [
-            for (var digit = 1; digit <= 9; digit++)
-              _numberButton(digit.toString()),
-            const SizedBox.shrink(),
-            _numberButton('0'),
-            _deleteButton(),
-          ],
-        );
-      },
-    );
-  }
-
-  Widget _numberButton(String digit) {
-    return _KeyButton(
-      key: ValueKey('digit-$digit'),
-      label: 'Digit $digit',
-      onPressed: () => loginBloc.add(LoginDigitPressed(digit)),
-      child: Text(
-        digit,
-        style: const TextStyle(
-          color: Color(0xFFF7F7FF),
-          fontSize: 32,
-          fontWeight: FontWeight.w400,
-        ),
-      ),
-    );
-  }
-
-  Widget _deleteButton() {
-    return _KeyButton(
-      key: const ValueKey('delete-digit'),
-      label: 'Delete last digit',
-      onPressed: () => loginBloc.add(LoginDeletePressed()),
-      child: const Icon(Icons.backspace_rounded, color: Colors.white, size: 27),
-    );
-  }
-}
-
-class _KeyButton extends StatelessWidget {
-  const _KeyButton({
-    super.key,
-    required this.label,
-    required this.onPressed,
-    required this.child,
-  });
-
-  final String label;
-  final VoidCallback onPressed;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
-      label: label,
-      child: Material(
-        color: const Color(0xFF10154C),
-        shape: const CircleBorder(),
-        child: InkWell(
-          customBorder: const CircleBorder(),
-          onTap: onPressed,
-          child: Center(child: child),
-        ),
-      ),
     );
   }
 }
