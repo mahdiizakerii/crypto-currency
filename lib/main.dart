@@ -1,6 +1,6 @@
-import 'package:crypto_currency/feature/wallet/presentation/bloc/wallet_bloc.dart';
-import 'package:crypto_currency/feature/wallet/presentation/bloc/wallet_status.dart';
-import 'package:crypto_currency/locator.dart';
+import 'package:tonkeeper/feature/wallet/presentation/bloc/wallet_bloc.dart';
+import 'package:tonkeeper/feature/wallet/presentation/bloc/wallet_status.dart';
+import 'package:tonkeeper/locator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -37,6 +37,10 @@ class _MainState extends State<Main> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('TonKeeper'),
+        centerTitle: true,
+      ),
       body: Center(
         child: BlocBuilder<WalletBloc, WalletState>(
           builder: (context, state) {

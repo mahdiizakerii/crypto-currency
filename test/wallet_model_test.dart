@@ -1,4 +1,4 @@
-import 'package:crypto_currency/feature/wallet/data/models/wallet_model.dart';
+import 'package:tonkeeper/feature/wallet/data/models/wallet_model.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
