@@ -1,4 +1,4 @@
-import 'package:local_auth/local_auth.dart';
+import 'package:crypto_currency/config/services/biometric_service.dart';
 
 abstract class BiometricLocalDataSource {
   Future<bool> isBiometricAvailable();
@@ -7,22 +7,17 @@ abstract class BiometricLocalDataSource {
 }
 
 class BiometricLocalDataSourceImpl implements BiometricLocalDataSource {
-  final LocalAuthentication _localAuth = LocalAuthentication();
+  BiometricLocalDataSourceImpl({required this.biometricService});
+
+  final BiometricService biometricService;
 
   @override
-  Future<bool> isBiometricAvailable() async {
-    final isSupported = await _localAuth.isDeviceSupported();
-    final biometrics = await _localAuth.getAvailableBiometrics();
-
-    return isSupported && biometrics.isNotEmpty;
+  Future<bool> isBiometricAvailable() {
+    return biometricService.isAvailable();
   }
 
   @override
-  Future<bool> authenticate() async {
-    return await _localAuth.authenticate(
-      localizedReason: 'Authenticate to access your wallet',
-      biometricOnly: true,
-      persistAcrossBackgrounding: true,
-    );
+  Future<bool> authenticate() {
+    return biometricService.authenticate();
   }
 }

@@ -1,3 +1,5 @@
+import 'package:crypto_currency/config/services/biometric_preference_service.dart';
+import 'package:crypto_currency/config/services/biometric_service.dart';
 import 'package:crypto_currency/core/resources/data_state.dart';
 import 'package:crypto_currency/feature/coinlist/domain/entities/market_coin.dart';
 import 'package:crypto_currency/feature/coinlist/domain/repositories/market_repository.dart';
@@ -67,7 +69,12 @@ void main() {
             ),
           ),
         ],
-        child: const MaterialApp(home: WalletPage()),
+        child: MaterialApp(
+          home: WalletPage(
+            biometricService: BiometricService(),
+            biometricPreferenceService: BiometricPreferenceService(),
+          ),
+        ),
       ),
     );
     await tester.pump();
@@ -103,7 +110,12 @@ void main() {
             ),
           ),
         ],
-        child: const MaterialApp(home: WalletPage()),
+        child: MaterialApp(
+          home: WalletPage(
+            biometricService: BiometricService(),
+            biometricPreferenceService: BiometricPreferenceService(),
+          ),
+        ),
       ),
     );
     await tester.pump();

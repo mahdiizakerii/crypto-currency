@@ -1,3 +1,5 @@
+import 'package:crypto_currency/config/services/biometric_preference_service.dart';
+import 'package:crypto_currency/config/services/biometric_service.dart';
 import 'package:crypto_currency/core/utils/app_theme.dart';
 import 'package:crypto_currency/feature/login/bloc/login_bloc.dart';
 import 'package:crypto_currency/feature/login/domain/repository/biometric_repository.dart';
@@ -22,7 +24,10 @@ void main() {
           body: Builder(
             builder: (context) => TextButton(
               onPressed: () {
-                confirmation = FingerprintBottomSheet.show(context);
+                confirmation = FingerprintBottomSheet.show(
+                  context,
+                  biometricService: BiometricService(),
+                );
               },
               child: const Text('Open fingerprint sheet'),
             ),
@@ -64,14 +69,22 @@ void main() {
     final biometricRepository = _FakeBiometricRepository(isAvailable: true);
 
     await tester.pumpWidget(
-      BlocProvider<LoginBloc>(
-        create: (_) => LoginBloc(
-          checkBiometricAvailability: CheckBiometricAvailability(
-            biometricRepository,
+      MultiRepositoryProvider(
+        providers: [
+          RepositoryProvider<BiometricService>.value(value: BiometricService()),
+          RepositoryProvider<BiometricPreferenceService>.value(
+            value: BiometricPreferenceService(),
           ),
-          authenticateBiometric: AuthenticateBiometric(biometricRepository),
+        ],
+        child: BlocProvider<LoginBloc>(
+          create: (_) => LoginBloc(
+            checkBiometricAvailability: CheckBiometricAvailability(
+              biometricRepository,
+            ),
+            authenticateBiometric: AuthenticateBiometric(biometricRepository),
+          ),
+          child: const MaterialApp(home: LoginPage()),
         ),
-        child: const MaterialApp(home: LoginPage()),
       ),
     );
     await tester.pumpAndSettle();

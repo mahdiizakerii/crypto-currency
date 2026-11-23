@@ -1,6 +1,7 @@
 // ignore_for_file: prefer_final_fields
 
 import 'package:crypto_currency/config/services/biometric_preference_service.dart';
+import 'package:crypto_currency/config/services/biometric_service.dart';
 import 'package:crypto_currency/core/utils/app_theme.dart';
 import 'package:crypto_currency/feature/login/bloc/login_bloc.dart';
 import 'package:crypto_currency/feature/login/bloc/login_event.dart';
@@ -27,7 +28,10 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> _loginWithBiometrics() async {
-    final enabled = await BiometricPreferenceService().isEnabled();
+    final biometricPreferenceService = context
+        .read<BiometricPreferenceService>();
+    final biometricService = context.read<BiometricService>();
+    final enabled = await biometricPreferenceService.isEnabled();
     if (!mounted) return;
 
     if (!enabled) {
@@ -37,7 +41,10 @@ class _LoginPageState extends State<LoginPage> {
       return;
     }
 
-    final authenticated = await FingerprintBottomSheet.show(context);
+    final authenticated = await FingerprintBottomSheet.show(
+      context,
+      biometricService: biometricService,
+    );
     if (!authenticated || !mounted) return;
 
     context.read<LoginBloc>().add(LoginBiometricAuthenticated());
@@ -60,7 +67,13 @@ class _LoginPageState extends State<LoginPage> {
               state.biometricStatus == BiometricStatus.authenticated) {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (_) => const WalletPage()),
+              MaterialPageRoute(
+                builder: (_) => WalletPage(
+                  biometricService: context.read<BiometricService>(),
+                  biometricPreferenceService: context
+                      .read<BiometricPreferenceService>(),
+                ),
+              ),
             );
           }
         },

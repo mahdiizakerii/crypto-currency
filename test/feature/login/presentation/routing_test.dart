@@ -1,3 +1,5 @@
+import 'package:crypto_currency/config/services/biometric_preference_service.dart';
+import 'package:crypto_currency/config/services/biometric_service.dart';
 import 'package:crypto_currency/core/resources/data_state.dart';
 import 'package:crypto_currency/feature/login/bloc/login_bloc.dart';
 import 'package:crypto_currency/feature/login/domain/repository/biometric_repository.dart';
@@ -24,26 +26,34 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
 
     await tester.pumpWidget(
-      MultiBlocProvider(
+      MultiRepositoryProvider(
         providers: [
-          BlocProvider<WalletBloc>(
-            create: (_) =>
-                WalletBloc(GetWalletUseCase(_EmptyWalletRepository())),
-          ),
-          BlocProvider<LoginBloc>(
-            create: (_) => LoginBloc(
-              checkBiometricAvailability: CheckBiometricAvailability(
-                _FakeBiometricRepository(),
-              ),
-              authenticateBiometric: AuthenticateBiometric(
-                _FakeBiometricRepository(),
-              ),
-            ),
+          RepositoryProvider<BiometricService>.value(value: BiometricService()),
+          RepositoryProvider<BiometricPreferenceService>.value(
+            value: BiometricPreferenceService(),
           ),
         ],
-        child: MaterialApp(
-          initialRoute: AppRoutes.login,
-          routes: AppRoutes.routes,
+        child: MultiBlocProvider(
+          providers: [
+            BlocProvider<WalletBloc>(
+              create: (_) =>
+                  WalletBloc(GetWalletUseCase(_EmptyWalletRepository())),
+            ),
+            BlocProvider<LoginBloc>(
+              create: (_) => LoginBloc(
+                checkBiometricAvailability: CheckBiometricAvailability(
+                  _FakeBiometricRepository(),
+                ),
+                authenticateBiometric: AuthenticateBiometric(
+                  _FakeBiometricRepository(),
+                ),
+              ),
+            ),
+          ],
+          child: MaterialApp(
+            initialRoute: AppRoutes.login,
+            routes: AppRoutes.routes,
+          ),
         ),
       ),
     );

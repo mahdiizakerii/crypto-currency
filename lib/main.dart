@@ -1,3 +1,5 @@
+import 'package:crypto_currency/config/services/biometric_preference_service.dart';
+import 'package:crypto_currency/config/services/biometric_service.dart';
 import 'package:crypto_currency/core/utils/app_theme.dart';
 import 'package:crypto_currency/feature/login/bloc/login_bloc.dart';
 import 'package:crypto_currency/feature/coinlist/presentation/bloc/market_bloc.dart';
@@ -21,22 +23,32 @@ class TonKeeperApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
+    return MultiRepositoryProvider(
       providers: [
-        BlocProvider<WalletBloc>.value(value: locator<WalletBloc>()),
-        BlocProvider<LoginBloc>(create: (_) => locator<LoginBloc>()),
-        BlocProvider<MarketBloc>(create: (_) => locator<MarketBloc>()),
-        BlocProvider<NewsBloc>(create: (_) => locator<NewsBloc>()),
-        BlocProvider<CollectiblesBloc>(
-          create: (_) => locator<CollectiblesBloc>(),
+        RepositoryProvider<BiometricService>.value(
+          value: locator<BiometricService>(),
+        ),
+        RepositoryProvider<BiometricPreferenceService>.value(
+          value: locator<BiometricPreferenceService>(),
         ),
       ],
-      child: MaterialApp(
-        title: 'TonKeeper',
-        debugShowCheckedModeBanner: false,
-        theme: AppTheme.dark,
-        initialRoute: AppRoutes.login,
-        routes: AppRoutes.routes,
+      child: MultiBlocProvider(
+        providers: [
+          BlocProvider<WalletBloc>(create: (_) => locator<WalletBloc>()),
+          BlocProvider<LoginBloc>(create: (_) => locator<LoginBloc>()),
+          BlocProvider<MarketBloc>(create: (_) => locator<MarketBloc>()),
+          BlocProvider<NewsBloc>(create: (_) => locator<NewsBloc>()),
+          BlocProvider<CollectiblesBloc>(
+            create: (_) => locator<CollectiblesBloc>(),
+          ),
+        ],
+        child: MaterialApp(
+          title: 'TonKeeper',
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.dark,
+          initialRoute: AppRoutes.login,
+          routes: AppRoutes.routes,
+        ),
       ),
     );
   }

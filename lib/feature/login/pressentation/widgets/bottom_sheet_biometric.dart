@@ -5,10 +5,9 @@ import 'package:flutter/material.dart';
 class FingerprintBottomSheet {
   static Future<bool> show(
     BuildContext context, {
-    BiometricService? biometricService,
+    required BiometricService biometricService,
     ValueChanged<bool>? onAuthenticationChanged,
   }) async {
-    final service = biometricService ?? BiometricService();
     var isVerifying = false;
 
     return await showModalBottomSheet<bool>(
@@ -71,7 +70,7 @@ class FingerprintBottomSheet {
                                         });
                                         onAuthenticationChanged?.call(true);
                                         try {
-                                          final success = await service
+                                          final success = await biometricService
                                               .authenticate();
                                           if (sheetContext.mounted) {
                                             Navigator.pop(

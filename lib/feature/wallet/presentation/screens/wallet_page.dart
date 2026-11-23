@@ -20,9 +20,14 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class WalletPage extends StatefulWidget {
-  const WalletPage({super.key, this.biometricService});
+  const WalletPage({
+    super.key,
+    this.biometricService,
+    this.biometricPreferenceService,
+  });
 
   final BiometricService? biometricService;
+  final BiometricPreferenceService? biometricPreferenceService;
 
   @override
   State<WalletPage> createState() => _WalletPageState();
@@ -30,13 +35,18 @@ class WalletPage extends StatefulWidget {
 
 class _WalletPageState extends State<WalletPage> with WidgetsBindingObserver {
   late final BiometricService _biometricService;
+  late final BiometricPreferenceService _biometricPreferenceService;
   bool _isAuthenticated = true;
   bool _isAuthenticating = false;
 
   @override
   void initState() {
     super.initState();
-    _biometricService = widget.biometricService ?? BiometricService();
+    _biometricService =
+        widget.biometricService ?? context.read<BiometricService>();
+    _biometricPreferenceService =
+        widget.biometricPreferenceService ??
+        context.read<BiometricPreferenceService>();
     WidgetsBinding.instance.addObserver(this);
   }
 
@@ -66,7 +76,7 @@ class _WalletPageState extends State<WalletPage> with WidgetsBindingObserver {
 
     setState(() => _isAuthenticating = true);
     try {
-      final biometricEnabled = await BiometricPreferenceService().isEnabled();
+      final biometricEnabled = await _biometricPreferenceService.isEnabled();
       if (!mounted) return;
 
       final isAuthenticated =
@@ -99,6 +109,7 @@ class _WalletPageState extends State<WalletPage> with WidgetsBindingObserver {
               screens: [
                 _WalletDashboardPage(
                   biometricService: _biometricService,
+                  biometricPreferenceService: _biometricPreferenceService,
                   onAuthenticationChanged: _handleAuthenticationChanged,
                 ),
                 ChartPage(),
@@ -143,10 +154,12 @@ class _WalletPageState extends State<WalletPage> with WidgetsBindingObserver {
 class _WalletDashboardPage extends StatefulWidget {
   const _WalletDashboardPage({
     required this.biometricService,
+    required this.biometricPreferenceService,
     required this.onAuthenticationChanged,
   });
 
   final BiometricService biometricService;
+  final BiometricPreferenceService biometricPreferenceService;
   final ValueChanged<bool> onAuthenticationChanged;
 
   @override
@@ -163,7 +176,7 @@ class _WalletDashboardPageState extends State<_WalletDashboardPage> {
   }
 
   Future<void> _loadBiometricPreference() async {
-    final enabled = await BiometricPreferenceService().isEnabled();
+    final enabled = await widget.biometricPreferenceService.isEnabled();
 
     if (!mounted) return;
 
@@ -196,7 +209,7 @@ class _WalletDashboardPageState extends State<_WalletDashboardPage> {
       if (!authenticated || !mounted) return;
     }
 
-    await BiometricPreferenceService().setEnabled(value);
+    await widget.biometricPreferenceService.setEnabled(value);
 
     if (!mounted) return;
 

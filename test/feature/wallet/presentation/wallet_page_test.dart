@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:crypto_currency/config/services/biometric_preference_service.dart';
 import 'package:crypto_currency/config/services/biometric_service.dart';
 import 'package:crypto_currency/core/resources/data_state.dart';
 import 'package:crypto_currency/core/utils/app_theme.dart';
@@ -25,7 +26,13 @@ void main() {
     await tester.pumpWidget(
       BlocProvider<WalletBloc>(
         create: (_) => WalletBloc(GetWalletUseCase(_EmptyWalletRepository())),
-        child: MaterialApp(theme: AppTheme.dark, home: const WalletPage()),
+        child: MaterialApp(
+          theme: AppTheme.dark,
+          home: WalletPage(
+            biometricService: _FakeBiometricService(),
+            biometricPreferenceService: BiometricPreferenceService(),
+          ),
+        ),
       ),
     );
     await tester.pump();
@@ -59,7 +66,13 @@ void main() {
     await tester.pumpWidget(
       BlocProvider<WalletBloc>(
         create: (_) => WalletBloc(GetWalletUseCase(_EmptyWalletRepository())),
-        child: MaterialApp(theme: AppTheme.dark, home: const WalletPage()),
+        child: MaterialApp(
+          theme: AppTheme.dark,
+          home: WalletPage(
+            biometricService: _FakeBiometricService(),
+            biometricPreferenceService: BiometricPreferenceService(),
+          ),
+        ),
       ),
     );
     await tester.pump();
@@ -94,7 +107,10 @@ void main() {
         create: (_) => WalletBloc(GetWalletUseCase(_EmptyWalletRepository())),
         child: MaterialApp(
           theme: AppTheme.dark,
-          home: WalletPage(biometricService: biometricService),
+          home: WalletPage(
+            biometricService: biometricService,
+            biometricPreferenceService: BiometricPreferenceService(),
+          ),
         ),
       ),
     );
@@ -122,7 +138,10 @@ void main() {
         create: (_) => WalletBloc(GetWalletUseCase(_EmptyWalletRepository())),
         child: MaterialApp(
           theme: AppTheme.dark,
-          home: WalletPage(biometricService: biometricService),
+          home: WalletPage(
+            biometricService: biometricService,
+            biometricPreferenceService: BiometricPreferenceService(),
+          ),
         ),
       ),
     );
@@ -148,7 +167,10 @@ void main() {
         create: (_) => WalletBloc(GetWalletUseCase(_EmptyWalletRepository())),
         child: MaterialApp(
           theme: AppTheme.dark,
-          home: WalletPage(biometricService: biometricService),
+          home: WalletPage(
+            biometricService: biometricService,
+            biometricPreferenceService: BiometricPreferenceService(),
+          ),
         ),
       ),
     );
@@ -184,7 +206,10 @@ void main() {
           create: (_) => WalletBloc(GetWalletUseCase(_EmptyWalletRepository())),
           child: MaterialApp(
             theme: AppTheme.dark,
-            home: WalletPage(biometricService: biometricService),
+            home: WalletPage(
+              biometricService: biometricService,
+              biometricPreferenceService: BiometricPreferenceService(),
+            ),
           ),
         ),
       );

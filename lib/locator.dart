@@ -1,3 +1,5 @@
+import 'package:crypto_currency/config/services/biometric_preference_service.dart';
+import 'package:crypto_currency/config/services/biometric_service.dart';
 import 'package:crypto_currency/feature/login/bloc/login_bloc.dart';
 import 'package:crypto_currency/feature/login/data/data%20source/biometric_local_datasource.dart';
 import 'package:crypto_currency/feature/login/data/data%20source/repository/biometric_repository_impl.dart';
@@ -28,9 +30,16 @@ import 'package:crypto_currency/feature/wallet/presentation/bloc/wallet_bloc.dar
 import 'package:crypto_currency/core/utils/constants.dart';
 import 'package:get_it/get_it.dart';
 
-GetIt locator = GetIt.instance;
+final GetIt locator = GetIt.instance;
 
 void setup() {
+  if (locator.isRegistered<CollectiblesApiProvider>()) return;
+
+  locator.registerLazySingleton<BiometricService>(() => BiometricService());
+  locator.registerLazySingleton<BiometricPreferenceService>(
+    () => BiometricPreferenceService(),
+  );
+
   locator.registerLazySingleton<CollectiblesApiProvider>(
     () => CollectiblesApiProvider(),
   );
@@ -66,24 +75,26 @@ void setup() {
   );
 
   // rest api
-  locator.registerSingleton<ApiProvider>(
-    ApiProvider(
+  locator.registerLazySingleton<ApiProvider>(
+    () => ApiProvider(
       authorization: Constants.walletAuthorization.isEmpty
           ? null
           : Constants.walletAuthorization,
     ),
   );
-  locator.registerSingleton<WalletRepository>(
-    WalletRepositoryImpl(locator<ApiProvider>()),
+  locator.registerLazySingleton<WalletRepository>(
+    () => WalletRepositoryImpl(locator<ApiProvider>()),
   );
   // use case
-  locator.registerSingleton<GetWalletUseCase>(GetWalletUseCase(locator()));
+  locator.registerLazySingleton<GetWalletUseCase>(
+    () => GetWalletUseCase(locator()),
+  );
 
   // bloc
-  locator.registerSingleton<WalletBloc>(WalletBloc(locator()));
+  locator.registerFactory<WalletBloc>(() => WalletBloc(locator()));
   // biometric datasource
   locator.registerLazySingleton<BiometricLocalDataSource>(
-    () => BiometricLocalDataSourceImpl(),
+    () => BiometricLocalDataSourceImpl(biometricService: locator()),
   );
 
   // biometric repository
