@@ -8,9 +8,12 @@ import 'package:crypto_currency/feature/wallet/presentation/screens/main_bottom_
 import 'package:crypto_currency/feature/chart/presentation/screens/chart_page.dart';
 import 'package:crypto_currency/feature/news/presentation/screens/news_page.dart';
 import 'package:crypto_currency/feature/collectibles/presentation/screens/collectibles_page.dart';
+import 'package:crypto_currency/feature/coinlist/domain/entities/market_coin.dart';
+import 'package:crypto_currency/feature/coindetail/presentation/screens/coin_detail_page.dart';
 import 'package:crypto_currency/feature/login/pressentation/widgets/bottom_sheet_biometric.dart';
 import 'package:crypto_currency/feature/wallet/presentation/widgets/biometric_switch.dart';
 import 'package:crypto_currency/feature/wallet/presentation/widgets/wallet_app_bar.dart';
+import 'package:crypto_currency/feature/wallet/presentation/screens/send_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -232,24 +235,27 @@ class _QuickActions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
-      children: const [
+      children: [
         Expanded(
           child: _QuickAction(
-            key: ValueKey('send-action'),
+            key: const ValueKey('send-action'),
             icon: Icons.north_east_rounded,
             label: 'Send',
+            onTap: () => Navigator.of(
+              context,
+            ).push(MaterialPageRoute<void>(builder: (_) => const SendPage())),
           ),
         ),
         Expanded(
           child: _QuickAction(
-            key: ValueKey('receive-action'),
+            key: const ValueKey('receive-action'),
             icon: Icons.south_west_rounded,
             label: 'Receive',
           ),
         ),
         Expanded(
           child: _QuickAction(
-            key: ValueKey('scan-action'),
+            key: const ValueKey('scan-action'),
             icon: Icons.qr_code_scanner_rounded,
             label: 'Scan',
           ),
@@ -260,10 +266,16 @@ class _QuickActions extends StatelessWidget {
 }
 
 class _QuickAction extends StatelessWidget {
-  const _QuickAction({super.key, required this.icon, required this.label});
+  const _QuickAction({
+    super.key,
+    required this.icon,
+    required this.label,
+    this.onTap,
+  });
 
   final IconData icon;
   final String label;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -277,7 +289,7 @@ class _QuickAction extends StatelessWidget {
             shape: const CircleBorder(),
             child: InkWell(
               customBorder: const CircleBorder(),
-              onTap: () {},
+              onTap: onTap ?? () {},
               child: Container(
                 width: 66,
                 height: 66,
@@ -580,59 +592,81 @@ class _AssetTile extends StatelessWidget {
         'Asset ${index + 1}';
     final symbol = _stringValue(asset['symbol']);
     final balance = _stringValue(asset['balance'] ?? asset['amount']);
+    final coinSymbol = symbol ?? title;
+    final coin = MarketCoin(
+      id: _stringValue(asset['id'] ?? asset['coinId']) ?? coinSymbol,
+      name: title,
+      symbol: coinSymbol,
+      price: _numberValue(asset['current_price'] ?? asset['price']),
+      change24h: _numberValue(asset['price_change_percentage_24h']),
+      imageUrl: _stringValue(asset['image'] ?? asset['imageUrl']),
+    );
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: AppTheme.surface,
+    return Material(
+      color: AppTheme.surface,
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
         borderRadius: BorderRadius.circular(16),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 38,
-            height: 38,
-            decoration: const BoxDecoration(
-              color: AppTheme.surfaceRaised,
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.token_outlined,
-              color: AppTheme.textPrimary,
-              size: 20,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+        onTap: () => Navigator.of(context).push(
+          MaterialPageRoute<void>(builder: (_) => CoinDetailPage(coin: coin)),
+        ),
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 10),
+          padding: const EdgeInsets.all(14),
+          child: Row(
+            children: [
+              Container(
+                width: 38,
+                height: 38,
+                decoration: const BoxDecoration(
+                  color: AppTheme.surfaceRaised,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.token_outlined,
+                  color: AppTheme.textPrimary,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        color: AppTheme.textPrimary,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    if (symbol != null)
+                      Text(
+                        symbol,
+                        style: const TextStyle(
+                          color: AppTheme.textSecondary,
+                          fontSize: 11,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              if (balance != null)
                 Text(
-                  title,
+                  balance,
                   style: const TextStyle(
                     color: AppTheme.textPrimary,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
+                    fontSize: 12,
                   ),
                 ),
-                if (symbol != null)
-                  Text(
-                    symbol,
-                    style: const TextStyle(
-                      color: AppTheme.textSecondary,
-                      fontSize: 11,
-                    ),
-                  ),
-              ],
-            ),
+              const Icon(
+                Icons.chevron_right_rounded,
+                color: AppTheme.textSecondary,
+              ),
+            ],
           ),
-          if (balance != null)
-            Text(
-              balance,
-              style: const TextStyle(color: AppTheme.textPrimary, fontSize: 12),
-            ),
-        ],
+        ),
       ),
     );
   }
@@ -642,5 +676,11 @@ class _AssetTile extends StatelessWidget {
       return value.toString();
     }
     return null;
+  }
+
+  num _numberValue(Object? value) {
+    if (value is num) return value;
+    if (value is String) return num.tryParse(value) ?? 0;
+    return 0;
   }
 }
