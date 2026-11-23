@@ -1,10 +1,10 @@
 import 'package:crypto_currency/core/utils/app_theme.dart';
+import 'package:crypto_currency/feature/chart/presentation/widgets/market_coin_tile.dart';
+import 'package:crypto_currency/feature/chart/presentation/widgets/market_summary_card.dart';
 import 'package:crypto_currency/feature/coindetail/presentation/screens/coin_detail_page.dart';
-import 'package:crypto_currency/feature/coinlist/domain/entities/market_coin.dart';
 import 'package:crypto_currency/feature/coinlist/presentation/bloc/market_bloc.dart';
 import 'package:crypto_currency/feature/coinlist/presentation/bloc/market_event.dart';
 import 'package:crypto_currency/feature/coinlist/presentation/bloc/market_state.dart';
-import 'package:crypto_currency/feature/coinlist/presentation/widgets/market_coin_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -52,7 +52,7 @@ class _ChartPageState extends State<ChartPage> {
             child: ListView(
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
               children: [
-                _MarketSummary(coins: state.coins),
+                MarketSummaryCard(coins: state.coins),
                 const SizedBox(height: 20),
                 TextField(
                   onChanged: (value) => setState(() => _search = value.trim()),
@@ -102,7 +102,7 @@ class _ChartPageState extends State<ChartPage> {
                   )
                 else
                   for (final coin in coins)
-                    _MarketCoinTile(
+                    MarketCoinTile(
                       coin: coin,
                       onTap: () => Navigator.of(context).push(
                         MaterialPageRoute<void>(
@@ -114,107 +114,6 @@ class _ChartPageState extends State<ChartPage> {
             ),
           );
         },
-      ),
-    );
-  }
-}
-
-class _MarketSummary extends StatelessWidget {
-  const _MarketSummary({required this.coins});
-
-  final List<MarketCoin> coins;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [AppTheme.primary, AppTheme.surfaceRaised],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Row(
-        children: [
-          const Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Explore crypto',
-                  style: TextStyle(
-                    color: AppTheme.textPrimary,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                SizedBox(height: 6),
-                Text(
-                  'Prices and market trends',
-                  style: TextStyle(color: AppTheme.textPrimary),
-                ),
-              ],
-            ),
-          ),
-          Text(
-            '${coins.length}',
-            style: const TextStyle(
-              color: AppTheme.textPrimary,
-              fontSize: 28,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _MarketCoinTile extends StatelessWidget {
-  const _MarketCoinTile({required this.coin, required this.onTap});
-
-  final MarketCoin coin;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final changeColor = coin.change24h >= 0
-        ? AppTheme.positive
-        : AppTheme.error;
-
-    return Card(
-      color: AppTheme.surface,
-      margin: const EdgeInsets.only(bottom: 8),
-      child: ListTile(
-        onTap: onTap,
-        leading: MarketCoinIcon(coin: coin),
-        title: Text(
-          coin.name,
-          style: const TextStyle(
-            color: AppTheme.textPrimary,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        subtitle: Text(
-          coin.symbol,
-          style: const TextStyle(color: AppTheme.textSecondary),
-        ),
-        trailing: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Text(
-              '\$${coin.price.toStringAsFixed(2)}',
-              style: const TextStyle(color: AppTheme.textPrimary),
-            ),
-            Text(
-              '${coin.change24h >= 0 ? '+' : ''}${coin.change24h.toStringAsFixed(2)}%',
-              style: TextStyle(color: changeColor, fontSize: 12),
-            ),
-          ],
-        ),
       ),
     );
   }
