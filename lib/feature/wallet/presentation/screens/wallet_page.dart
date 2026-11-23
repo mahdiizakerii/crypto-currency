@@ -5,6 +5,7 @@ import 'package:crypto_currency/feature/wallet/domain/entites/wallet_entities.da
 import 'package:crypto_currency/feature/wallet/presentation/bloc/wallet_bloc.dart';
 import 'package:crypto_currency/feature/wallet/presentation/bloc/wallet_status.dart';
 import 'package:crypto_currency/feature/wallet/presentation/screens/main_bottom_nav.dart';
+import 'package:crypto_currency/feature/chart/presentation/screens/chart_page.dart';
 import 'package:crypto_currency/feature/login/pressentation/widgets/bottom_sheet_biometric.dart';
 import 'package:crypto_currency/feature/wallet/presentation/widgets/biometric_switch.dart';
 import 'package:crypto_currency/feature/wallet/presentation/widgets/wallet_app_bar.dart';
@@ -20,7 +21,7 @@ class WalletPage extends StatelessWidget {
     return const MainBottomNav(
       screens: [
         _WalletDashboardPage(),
-        _ComingSoonPage(title: 'Chart'),
+        ChartPage(),
         _ComingSoonPage(title: 'News'),
         _ComingSoonPage(title: 'Collectibles'),
       ],

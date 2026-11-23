@@ -4,6 +4,7 @@ import 'package:crypto_currency/feature/coinlist/domain/entities/market_coin.dar
 import 'package:crypto_currency/feature/coinlist/presentation/bloc/market_bloc.dart';
 import 'package:crypto_currency/feature/coinlist/presentation/bloc/market_event.dart';
 import 'package:crypto_currency/feature/coinlist/presentation/bloc/market_state.dart';
+import 'package:crypto_currency/feature/coinlist/presentation/widgets/market_coin_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -87,7 +88,7 @@ class _CoinHeading extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        _CoinImage(coin: coin, size: 44),
+        MarketCoinIcon(coin: coin, size: 44),
         const SizedBox(width: 12),
         Text(
           coin.symbol,
@@ -245,29 +246,6 @@ class _CoinInformation extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-class _CoinImage extends StatelessWidget {
-  const _CoinImage({required this.coin, required this.size});
-
-  final MarketCoin coin;
-  final double size;
-
-  @override
-  Widget build(BuildContext context) {
-    final imageUrl = coin.imageUrl;
-    return CircleAvatar(
-      radius: size / 2,
-      backgroundColor: AppTheme.surfaceRaised,
-      backgroundImage: imageUrl == null ? null : NetworkImage(imageUrl),
-      child: imageUrl == null
-          ? Text(
-              coin.symbol.characters.first,
-              style: const TextStyle(color: AppTheme.textPrimary),
-            )
-          : null,
     );
   }
 }
