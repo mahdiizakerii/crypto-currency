@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:crypto_currency/config/services/biometric_service.dart';
 import 'package:crypto_currency/core/resources/data_state.dart';
 import 'package:crypto_currency/core/utils/app_theme.dart';
@@ -34,6 +36,11 @@ void main() {
     expect(find.text(r'$0.00'), findsOneWidget);
     expect(find.text('Chart'), findsOneWidget);
     expect(find.byIcon(Icons.show_chart_rounded), findsOneWidget);
+    expect(
+      tester.getRect(find.text('Chart')).top -
+          tester.getRect(find.byIcon(Icons.show_chart_rounded)).bottom,
+      closeTo(4, 0.1),
+    );
     expect(find.text('News'), findsOneWidget);
     expect(find.text('Collectibles'), findsOneWidget);
 
@@ -74,10 +81,12 @@ void main() {
     );
   });
 
-  testWidgets('authenticates again when the app returns to the foreground', (
+  testWidgets('authenticates on resume when biometric login is enabled', (
     WidgetTester tester,
   ) async {
-    FlutterSecureStorage.setMockInitialValues({});
+    FlutterSecureStorage.setMockInitialValues({
+      'biometric_login_enabled': 'true',
+    });
     final biometricService = _FakeBiometricService();
 
     await tester.pumpWidget(
@@ -101,6 +110,110 @@ void main() {
     expect(biometricService.authenticationCount, 1);
     expect(find.text('Your wallet is empty'), findsOneWidget);
   });
+
+  testWidgets('does not authenticate on resume when biometrics are disabled', (
+    WidgetTester tester,
+  ) async {
+    FlutterSecureStorage.setMockInitialValues({});
+    final biometricService = _FakeBiometricService();
+
+    await tester.pumpWidget(
+      BlocProvider<WalletBloc>(
+        create: (_) => WalletBloc(GetWalletUseCase(_EmptyWalletRepository())),
+        child: MaterialApp(
+          theme: AppTheme.dark,
+          home: WalletPage(biometricService: biometricService),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+    await tester.pump();
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pumpAndSettle();
+
+    expect(biometricService.authenticationCount, 0);
+    expect(find.text('Your wallet is empty'), findsOneWidget);
+  });
+
+  testWidgets('cancel closes biometric sheet without enabling login', (
+    WidgetTester tester,
+  ) async {
+    FlutterSecureStorage.setMockInitialValues({});
+    final biometricService = _FakeBiometricService();
+
+    await tester.pumpWidget(
+      BlocProvider<WalletBloc>(
+        create: (_) => WalletBloc(GetWalletUseCase(_EmptyWalletRepository())),
+        child: MaterialApp(
+          theme: AppTheme.dark,
+          home: WalletPage(biometricService: biometricService),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const ValueKey('biometric-switch')));
+    await tester.pumpAndSettle();
+    expect(find.text('Fingerprint login'), findsOneWidget);
+
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Fingerprint login'), findsNothing);
+    expect(biometricService.authenticationCount, 0);
+    expect(
+      tester
+          .widget<Switch>(find.byKey(const ValueKey('biometric-switch')))
+          .value,
+      isFalse,
+    );
+  });
+
+  testWidgets(
+    'does not repeat authentication when the biometric prompt changes lifecycle',
+    (WidgetTester tester) async {
+      FlutterSecureStorage.setMockInitialValues({});
+      final biometricService = _FakeBiometricService(
+        authenticationResult: Completer<bool>(),
+      );
+
+      await tester.pumpWidget(
+        BlocProvider<WalletBloc>(
+          create: (_) => WalletBloc(GetWalletUseCase(_EmptyWalletRepository())),
+          child: MaterialApp(
+            theme: AppTheme.dark,
+            home: WalletPage(biometricService: biometricService),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const ValueKey('biometric-switch')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Verify'));
+      await tester.pump();
+
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+      await tester.pump();
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pump();
+
+      expect(biometricService.authenticationCount, 1);
+
+      biometricService.authenticationResult!.complete(true);
+      await tester.pumpAndSettle();
+
+      expect(
+        tester
+            .widget<Switch>(find.byKey(const ValueKey('biometric-switch')))
+            .value,
+        isTrue,
+      );
+      expect(biometricService.authenticationCount, 1);
+    },
+  );
 }
 
 class _EmptyWalletRepository extends WalletRepository {
@@ -122,11 +235,19 @@ class _EmptyWalletRepository extends WalletRepository {
 }
 
 class _FakeBiometricService extends BiometricService {
+  _FakeBiometricService({this.authenticationResult});
+
+  final Completer<bool>? authenticationResult;
   int authenticationCount = 0;
 
   @override
   Future<bool> authenticate() async {
     authenticationCount++;
+    return authenticationResult?.future ?? true;
+  }
+
+  @override
+  Future<bool> isAvailable() async {
     return true;
   }
 }
