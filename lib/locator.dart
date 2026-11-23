@@ -15,6 +15,11 @@ import 'package:crypto_currency/feature/news/data/repositories/news_repository_i
 import 'package:crypto_currency/feature/news/domain/repositories/news_repository.dart';
 import 'package:crypto_currency/feature/news/domain/use_cases/get_news_use_case.dart';
 import 'package:crypto_currency/feature/news/presentation/bloc/news_bloc.dart';
+import 'package:crypto_currency/feature/collectibles/data/data_source/collectibles_api_provider.dart';
+import 'package:crypto_currency/feature/collectibles/data/repositories/collectibles_repository_impl.dart';
+import 'package:crypto_currency/feature/collectibles/domain/repositories/collectibles_repository.dart';
+import 'package:crypto_currency/feature/collectibles/domain/use_cases/get_collectibles_use_case.dart';
+import 'package:crypto_currency/feature/collectibles/presentation/bloc/collectibles_bloc.dart';
 import 'package:crypto_currency/feature/wallet/data/data_source/remote/api_provider.dart';
 import 'package:crypto_currency/feature/wallet/data/repository/wallet_repository_impl.dart';
 import 'package:crypto_currency/feature/wallet/domain/repository/wallet_repository.dart';
@@ -26,6 +31,17 @@ import 'package:get_it/get_it.dart';
 GetIt locator = GetIt.instance;
 
 void setup() {
+  locator.registerLazySingleton<CollectiblesApiProvider>(
+    () => CollectiblesApiProvider(),
+  );
+  locator.registerLazySingleton<CollectiblesRepository>(
+    () => CollectiblesRepositoryImpl(locator()),
+  );
+  locator.registerLazySingleton<GetCollectiblesUseCase>(
+    () => GetCollectiblesUseCase(locator()),
+  );
+  locator.registerFactory<CollectiblesBloc>(() => CollectiblesBloc(locator()));
+
   locator.registerLazySingleton<NewsApiProvider>(() => NewsApiProvider());
   locator.registerLazySingleton<NewsRepository>(
     () => NewsRepositoryImpl(locator()),

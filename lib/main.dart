@@ -3,6 +3,7 @@ import 'package:crypto_currency/feature/login/bloc/login_bloc.dart';
 import 'package:crypto_currency/feature/login/pressentation/login_page.dart';
 import 'package:crypto_currency/feature/coinlist/presentation/bloc/market_bloc.dart';
 import 'package:crypto_currency/feature/news/presentation/bloc/news_bloc.dart';
+import 'package:crypto_currency/feature/collectibles/presentation/bloc/collectibles_bloc.dart';
 import 'package:crypto_currency/feature/wallet/presentation/bloc/wallet_bloc.dart';
 import 'package:crypto_currency/locator.dart';
 import 'package:flutter/material.dart';
@@ -24,6 +25,9 @@ class TonKeeperApp extends StatelessWidget {
         BlocProvider<LoginBloc>(create: (_) => locator<LoginBloc>()),
         BlocProvider<MarketBloc>(create: (_) => locator<MarketBloc>()),
         BlocProvider<NewsBloc>(create: (_) => locator<NewsBloc>()),
+        BlocProvider<CollectiblesBloc>(
+          create: (_) => locator<CollectiblesBloc>(),
+        ),
       ],
       child: MaterialApp(
         title: 'TonKeeper',

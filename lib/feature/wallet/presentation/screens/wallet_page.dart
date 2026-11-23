@@ -7,6 +7,7 @@ import 'package:crypto_currency/feature/wallet/presentation/bloc/wallet_status.d
 import 'package:crypto_currency/feature/wallet/presentation/screens/main_bottom_nav.dart';
 import 'package:crypto_currency/feature/chart/presentation/screens/chart_page.dart';
 import 'package:crypto_currency/feature/news/presentation/screens/news_page.dart';
+import 'package:crypto_currency/feature/collectibles/presentation/screens/collectibles_page.dart';
 import 'package:crypto_currency/feature/login/pressentation/widgets/bottom_sheet_biometric.dart';
 import 'package:crypto_currency/feature/wallet/presentation/widgets/biometric_switch.dart';
 import 'package:crypto_currency/feature/wallet/presentation/widgets/wallet_app_bar.dart';
@@ -24,7 +25,7 @@ class WalletPage extends StatelessWidget {
         _WalletDashboardPage(),
         ChartPage(),
         NewsPage(),
-        _ComingSoonPage(title: 'Collectibles'),
+        CollectiblesPage(),
       ],
     );
   }
@@ -641,23 +642,5 @@ class _AssetTile extends StatelessWidget {
       return value.toString();
     }
     return null;
-  }
-}
-
-class _ComingSoonPage extends StatelessWidget {
-  const _ComingSoonPage({required this.title});
-
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: Text(
-          '$title is coming soon',
-          style: const TextStyle(color: AppTheme.textSecondary),
-        ),
-      ),
-    );
   }
 }
