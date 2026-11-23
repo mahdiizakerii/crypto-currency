@@ -80,7 +80,7 @@ void main() {
     expect(find.text('Bitcoin (BTC) market price'), findsOneWidget);
   });
 
-  testWidgets('wallet send shortcut opens the disabled send page', (
+  testWidgets('wallet send shortcut has no action', (
     WidgetTester tester,
   ) async {
     FlutterSecureStorage.setMockInitialValues({});
@@ -112,11 +112,8 @@ void main() {
     await tester.tap(find.bySemanticsLabel('Send'));
     await tester.pumpAndSettle();
 
-    expect(find.text('No assets to send'), findsOneWidget);
-    expect(
-      tester.widget<FilledButton>(find.byType(FilledButton)).onPressed,
-      isNull,
-    );
+    expect(find.text('Your wallet is empty'), findsOneWidget);
+    expect(find.text('No assets to send'), findsNothing);
   });
 }
 

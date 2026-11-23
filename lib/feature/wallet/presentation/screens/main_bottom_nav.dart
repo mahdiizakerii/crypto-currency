@@ -59,6 +59,7 @@ class _MainBottomNavState extends State<MainBottomNav> {
         hideNavigationBarWhenKeyboardAppears: false,
         confineToSafeArea: true,
         navBarHeight: 76,
+        padding: const EdgeInsets.only(bottom: 12),
         navBarStyle: NavBarStyle.style6,
       ),
     );

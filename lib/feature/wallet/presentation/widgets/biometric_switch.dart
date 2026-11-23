@@ -12,6 +12,14 @@ class BiometricSwitch extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Switch(value: value, onChanged: onChanged);
+    return Semantics(
+      label: 'Biometrics ${value ? 'on' : 'off'}',
+      toggled: value,
+      child: Switch(
+        key: const ValueKey('biometric-switch'),
+        value: value,
+        onChanged: onChanged,
+      ),
+    );
   }
 }

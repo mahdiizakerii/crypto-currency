@@ -357,16 +357,10 @@ class _QuickActions extends StatelessWidget {
 }
 
 class _QuickAction extends StatelessWidget {
-  const _QuickAction({
-    super.key,
-    required this.icon,
-    required this.label,
-    this.onTap,
-  });
+  const _QuickAction({super.key, required this.icon, required this.label});
 
   final IconData icon;
   final String label;
-  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -380,7 +374,7 @@ class _QuickAction extends StatelessWidget {
             shape: const CircleBorder(),
             child: InkWell(
               customBorder: const CircleBorder(),
-              onTap: onTap ?? () {},
+              onTap: () {},
               child: Container(
                 width: 66,
                 height: 66,
@@ -433,8 +427,8 @@ class _SecurityCard extends StatelessWidget {
             iconBackgroundColor: AppTheme.positiveIconBackground,
             title: 'Use biometrics to log in',
             trailing: BiometricSwitch(
-              value: this.isBiometricEnabled,
-              onChanged: this.onBiometricChanged,
+              value: isBiometricEnabled,
+              onChanged: onBiometricChanged,
             ),
           ),
           Divider(height: 1, color: AppTheme.dividerColor),

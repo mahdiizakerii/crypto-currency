@@ -20,38 +20,23 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  bool _biometricLoginEnabled = false;
   @override
   void initState() {
     super.initState();
     context.read<LoginBloc>().add(BiometricAvailabilityRequested());
   }
 
-  Future<void> _loadBiometricPreference() async {
+  Future<void> _loginWithBiometrics() async {
     final enabled = await BiometricPreferenceService().isEnabled();
-
     if (!mounted) return;
 
-    setState(() {
-      _biometricLoginEnabled = enabled;
-    });
-  }
-
-  Future<void> _toggleBiometricLogin(bool enabled) async {
-    if (enabled) {
-      final verified = await FingerprintBottomSheet.show(context);
-      if (!verified || !mounted) return;
+    if (!enabled) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enable fingerprint login first.')),
+      );
+      return;
     }
 
-    await BiometricPreferenceService().setEnabled(enabled);
-    if (!mounted) return;
-
-    setState(() {
-      _biometricLoginEnabled = enabled;
-    });
-  }
-
-  Future<void> _loginWithBiometrics() async {
     final authenticated = await FingerprintBottomSheet.show(context);
     if (!authenticated || !mounted) return;
 
@@ -67,6 +52,7 @@ class _LoginPageState extends State<LoginPage> {
         statusBarBrightness: Brightness.dark,
         systemNavigationBarColor: AppTheme.background,
         systemNavigationBarIconBrightness: Brightness.light,
+        systemNavigationBarContrastEnforced: false,
       ),
       child: BlocConsumer<LoginBloc, LoginState>(
         listener: (context, state) {
@@ -101,28 +87,7 @@ class _LoginPageState extends State<LoginPage> {
                       passcode: state.passcode,
                       isIncorrect: state.isPasscodeIncorrect,
                     ),
-                    if (state.biometricStatus == BiometricStatus.available) ...[
-                      const SizedBox(height: 30),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            'Use fingerprint to log in',
-                            style: const TextStyle(
-                              color: AppTheme.textSecondary,
-                              fontSize: 12,
-                            ),
-                          ),
-                          Switch(
-                            key: const ValueKey('login-biometric-switch'),
-                            value: _biometricLoginEnabled,
-                            onChanged: _toggleBiometricLogin,
-                          ),
-                        ],
-                      ),
-                    ],
-                    if (_biometricLoginEnabled &&
-                        state.biometricStatus == BiometricStatus.available)
+                    if (state.biometricStatus == BiometricStatus.available)
                       IconButton(
                         onPressed: _loginWithBiometrics,
                         icon: const Icon(
