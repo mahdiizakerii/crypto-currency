@@ -92,6 +92,7 @@ class _WalletDashboardPageState extends State<_WalletDashboardPage> {
         statusBarBrightness: Brightness.dark,
         systemNavigationBarColor: AppTheme.surface,
         systemNavigationBarIconBrightness: Brightness.light,
+        systemNavigationBarContrastEnforced: false,
       ),
       child: Scaffold(
         appBar: const WalletAppBar(),
@@ -337,7 +338,7 @@ class _SecurityCard extends StatelessWidget {
             iconColor: AppTheme.warning,
             iconBackgroundColor: AppTheme.warningIconBackground,
             title: 'Back up the wallet recovery phrase',
-            trailing: _StaticSwitch(value: false),
+            trailing: const _LocalSwitch(),
           ),
         ],
       ),
@@ -394,34 +395,27 @@ class _SecurityRow extends StatelessWidget {
   }
 }
 
-class _StaticSwitch extends StatelessWidget {
-  const _StaticSwitch({required this.value});
+class _LocalSwitch extends StatefulWidget {
+  const _LocalSwitch();
 
-  final bool value;
+  @override
+  State<_LocalSwitch> createState() => _LocalSwitchState();
+}
+
+class _LocalSwitchState extends State<_LocalSwitch> {
+  bool _value = false;
 
   @override
   Widget build(BuildContext context) {
     return Semantics(
-      label: 'Biometrics ${value ? 'on' : 'off'}',
-      child: Container(
-        width: 34,
-        height: 20,
-        padding: const EdgeInsets.all(3),
-        decoration: BoxDecoration(
-          color: value ? AppTheme.primary : AppTheme.surfaceRaised,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Align(
-          alignment: value ? Alignment.centerRight : Alignment.centerLeft,
-          child: Container(
-            width: 14,
-            height: 14,
-            decoration: const BoxDecoration(
-              color: AppTheme.textPrimary,
-              shape: BoxShape.circle,
-            ),
-          ),
-        ),
+      label: 'Back up wallet recovery phrase ${_value ? 'on' : 'off'}',
+      child: Switch(
+        value: _value,
+        onChanged: (value) {
+          setState(() {
+            _value = value;
+          });
+        },
       ),
     );
   }
@@ -594,11 +588,18 @@ class _AssetTile extends StatelessWidget {
               color: AppTheme.surfaceRaised,
               shape: BoxShape.circle,
             ),
-            child: const Icon(
-              Icons.token_outlined,
-              color: AppTheme.textPrimary,
-              size: 20,
-            ),
+            child: _isEthereumAsset(symbol, title)
+                ? ClipOval(
+                    child: Image.asset(
+                      'assets/icons/ethereum.png',
+                      fit: BoxFit.cover,
+                    ),
+                  )
+                : const Icon(
+                    Icons.token_outlined,
+                    color: AppTheme.textPrimary,
+                    size: 20,
+                  ),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -639,6 +640,10 @@ class _AssetTile extends StatelessWidget {
       return value.toString();
     }
     return null;
+  }
+
+  bool _isEthereumAsset(String? symbol, String title) {
+    return symbol?.toUpperCase() == 'ETH' || title.toLowerCase() == 'ethereum';
   }
 }
 
