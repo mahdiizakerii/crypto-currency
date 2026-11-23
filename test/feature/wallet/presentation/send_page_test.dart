@@ -79,6 +79,45 @@ void main() {
     expect(find.text('Price chart'), findsOneWidget);
     expect(find.text('Bitcoin (BTC) market price'), findsOneWidget);
   });
+
+  testWidgets('wallet send shortcut opens the disabled send page', (
+    WidgetTester tester,
+  ) async {
+    FlutterSecureStorage.setMockInitialValues({});
+    tester.view.physicalSize = const Size(402, 874);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      MultiBlocProvider(
+        providers: [
+          BlocProvider<WalletBloc>(
+            create: (_) =>
+                WalletBloc(GetWalletUseCase(_FakeWalletRepository(const []))),
+          ),
+          BlocProvider<MarketBloc>(
+            create: (_) => MarketBloc(
+              getMarketCoins: GetMarketCoinsUseCase(_FakeMarketRepository()),
+              getCoinChart: GetCoinChartUseCase(_FakeMarketRepository()),
+            ),
+          ),
+        ],
+        child: const MaterialApp(home: WalletPage()),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    await tester.tap(find.bySemanticsLabel('Send'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('No assets to send'), findsOneWidget);
+    expect(
+      tester.widget<FilledButton>(find.byType(FilledButton)).onPressed,
+      isNull,
+    );
+  });
 }
 
 class _FakeWalletRepository extends WalletRepository {
