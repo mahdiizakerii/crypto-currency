@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 class AppTheme {
   static const background = Color(0xFF080D3B);
   static const primary = Color(0xFF304BFF);
+  static const error = Color(0xFFFF4B5C);
   static const surface = Color(0xFF10154C);
   static const textPrimary = Color(0xFFF7F7FF);
   static const border = Color(0xFF263FC6);
