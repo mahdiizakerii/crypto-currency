@@ -58,7 +58,7 @@ class _MainBottomNavState extends State<MainBottomNav> {
         stateManagement: true,
         hideNavigationBarWhenKeyboardAppears: false,
         confineToSafeArea: true,
-        navBarHeight: 68,
+        navBarHeight: 76,
         navBarStyle: NavBarStyle.style6,
       ),
     );

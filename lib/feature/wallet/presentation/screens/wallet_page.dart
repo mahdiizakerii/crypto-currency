@@ -1,8 +1,12 @@
+import 'package:crypto_currency/config/services/biometric_preference_service.dart';
+import 'package:crypto_currency/config/services/biometric_service.dart';
 import 'package:crypto_currency/core/utils/app_theme.dart';
 import 'package:crypto_currency/feature/wallet/domain/entites/wallet_entities.dart';
 import 'package:crypto_currency/feature/wallet/presentation/bloc/wallet_bloc.dart';
 import 'package:crypto_currency/feature/wallet/presentation/bloc/wallet_status.dart';
-import 'package:crypto_currency/feature/wallet/presentation/pages/main_bottom_nav.dart';
+import 'package:crypto_currency/feature/wallet/presentation/screens/main_bottom_nav.dart';
+import 'package:crypto_currency/feature/login/pressentation/widgets/bottom_sheet_biometric.dart';
+import 'package:crypto_currency/feature/wallet/presentation/widgets/biometric_switch.dart';
 import 'package:crypto_currency/feature/wallet/presentation/widgets/wallet_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -32,10 +36,51 @@ class _WalletDashboardPage extends StatefulWidget {
 }
 
 class _WalletDashboardPageState extends State<_WalletDashboardPage> {
+  bool _biometricLoginEnabled = false;
   @override
   void initState() {
     super.initState();
+    _loadBiometricPreference();
     context.read<WalletBloc>().add(FetchWalletData());
+  }
+
+  Future<void> _loadBiometricPreference() async {
+    final enabled = await BiometricPreferenceService().isEnabled();
+
+    if (!mounted) return;
+
+    setState(() {
+      _biometricLoginEnabled = enabled;
+    });
+  }
+
+  Future<void> _handleBiometricChanged(bool value) async {
+    if (value) {
+      final available = await BiometricService().isAvailable();
+
+      if (!mounted) return;
+
+      if (!available) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Biometric authentication is not available'),
+          ),
+        );
+        return;
+      }
+
+      final authenticated = await FingerprintBottomSheet.show(context);
+
+      if (!authenticated || !mounted) return;
+    }
+
+    await BiometricPreferenceService().setEnabled(value);
+
+    if (!mounted) return;
+
+    setState(() {
+      _biometricLoginEnabled = value;
+    });
   }
 
   @override
@@ -72,7 +117,8 @@ class _WalletDashboardPageState extends State<_WalletDashboardPage> {
                   const _QuickActions(),
                   const SizedBox(height: 28),
                   _SecurityCard(
-                    isBiometricEnabled: wallet?.isBiometricEnabled ?? false,
+                    isBiometricEnabled: _biometricLoginEnabled,
+                    onBiometricChanged: _handleBiometricChanged,
                   ),
                   const SizedBox(height: 28),
                   _AssetsSection(
@@ -257,9 +303,13 @@ class _QuickAction extends StatelessWidget {
 }
 
 class _SecurityCard extends StatelessWidget {
-  const _SecurityCard({required this.isBiometricEnabled});
+  const _SecurityCard({
+    required this.isBiometricEnabled,
+    required this.onBiometricChanged,
+  });
 
   final bool isBiometricEnabled;
+  final ValueChanged<bool> onBiometricChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -275,19 +325,19 @@ class _SecurityCard extends StatelessWidget {
             icon: Icons.fingerprint_rounded,
             iconColor: AppTheme.positive,
             iconBackgroundColor: AppTheme.positiveIconBackground,
-            title: 'Use biometrics to approve transaction',
-            trailing: _StaticSwitch(value: isBiometricEnabled),
+            title: 'Use biometrics to log in',
+            trailing: BiometricSwitch(
+              value: isBiometricEnabled,
+              onChanged: onBiometricChanged,
+            ),
           ),
           Divider(height: 1, color: AppTheme.dividerColor),
-          const _SecurityRow(
+          _SecurityRow(
             icon: Icons.key_rounded,
             iconColor: AppTheme.warning,
             iconBackgroundColor: AppTheme.warningIconBackground,
             title: 'Back up the wallet recovery phrase',
-            trailing: Icon(
-              Icons.chevron_right_rounded,
-              color: AppTheme.textSecondary,
-            ),
+            trailing: _StaticSwitch(value: false),
           ),
         ],
       ),

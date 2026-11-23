@@ -1,6 +1,6 @@
 {
-    "name": "crypto_currency",
-    "short_name": "crypto_currency",
+    "name": "TonKeeper",
+    "short_name": "TonKeeper",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

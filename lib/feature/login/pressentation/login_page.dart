@@ -1,9 +1,13 @@
+// ignore_for_file: prefer_final_fields
+
+import 'package:crypto_currency/config/services/biometric_preference_service.dart';
 import 'package:crypto_currency/core/utils/app_theme.dart';
 import 'package:crypto_currency/feature/login/bloc/login_bloc.dart';
 import 'package:crypto_currency/feature/login/bloc/login_event.dart';
 import 'package:crypto_currency/feature/login/bloc/login_state.dart';
+import 'package:crypto_currency/feature/login/pressentation/widgets/bottom_sheet_biometric.dart';
 import 'package:crypto_currency/feature/login/pressentation/widgets/number.dart';
-import 'package:crypto_currency/feature/wallet/presentation/pages/wallet_page.dart';
+import 'package:crypto_currency/feature/wallet/presentation/screens/wallet_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -16,11 +20,43 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  bool _biometricLoginEnabled = false;
   @override
   void initState() {
     super.initState();
-
+    _loadBiometricPreference();
     context.read<LoginBloc>().add(BiometricAvailabilityRequested());
+  }
+
+  Future<void> _loadBiometricPreference() async {
+    final enabled = await BiometricPreferenceService().isEnabled();
+
+    if (!mounted) return;
+
+    setState(() {
+      _biometricLoginEnabled = enabled;
+    });
+  }
+
+  Future<void> _toggleBiometricLogin(bool enabled) async {
+    if (enabled) {
+      final verified = await FingerprintBottomSheet.show(context);
+      if (!verified || !mounted) return;
+    }
+
+    await BiometricPreferenceService().setEnabled(enabled);
+    if (!mounted) return;
+
+    setState(() {
+      _biometricLoginEnabled = enabled;
+    });
+  }
+
+  Future<void> _loginWithBiometrics() async {
+    final authenticated = await FingerprintBottomSheet.show(context);
+    if (!authenticated || !mounted) return;
+
+    context.read<LoginBloc>().add(LoginBiometricAuthenticated());
   }
 
   @override
@@ -40,17 +76,6 @@ class _LoginPageState extends State<LoginPage> {
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(builder: (_) => const WalletPage()),
-            );
-          } else if (state.passcode.length == 4) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Incorrect passcode. Please try again.'),
-                duration: Duration(seconds: 2),
-              ),
-            );
-          } else if (state.biometricStatus == BiometricStatus.failed) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Biometric authentication failed')),
             );
           }
         },
@@ -74,15 +99,34 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                     const SizedBox(height: 25),
-                    _PasscodeIndicator(passcode: state.passcode),
+                    _PasscodeIndicator(
+                      passcode: state.passcode,
+                      isIncorrect: state.isPasscodeIncorrect,
+                    ),
                     if (state.biometricStatus == BiometricStatus.available) ...[
                       const SizedBox(height: 30),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Use fingerprint to log in',
+                            style: const TextStyle(
+                              color: AppTheme.textSecondary,
+                              fontSize: 12,
+                            ),
+                          ),
+                          Switch(
+                            key: const ValueKey('login-biometric-switch'),
+                            value: _biometricLoginEnabled,
+                            onChanged: _toggleBiometricLogin,
+                          ),
+                        ],
+                      ),
+                    ],
+                    if (_biometricLoginEnabled &&
+                        state.biometricStatus == BiometricStatus.available)
                       IconButton(
-                        onPressed: () {
-                          context.read<LoginBloc>().add(
-                            BiometricAuthenticationRequested(),
-                          );
-                        },
+                        onPressed: _loginWithBiometrics,
                         icon: const Icon(
                           Icons.fingerprint,
                           size: 48,
@@ -90,7 +134,6 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                         tooltip: 'Authenticate with biometrics',
                       ),
-                    ],
                     Expanded(
                       child: NumberFiled(loginBloc: context.read<LoginBloc>()),
                     ),
@@ -127,9 +170,10 @@ class _LoginIcon extends StatelessWidget {
 }
 
 class _PasscodeIndicator extends StatelessWidget {
-  const _PasscodeIndicator({required this.passcode});
+  const _PasscodeIndicator({required this.passcode, required this.isIncorrect});
 
   final String passcode;
+  final bool isIncorrect;
 
   @override
   Widget build(BuildContext context) {
@@ -150,9 +194,15 @@ class _PasscodeIndicator extends StatelessWidget {
               width: 24,
               height: 24,
               decoration: BoxDecoration(
-                color: isEntered ? AppTheme.primary : AppTheme.surface,
+                color: isIncorrect
+                    ? AppTheme.error
+                    : isEntered
+                    ? AppTheme.primary
+                    : AppTheme.surface,
                 shape: BoxShape.circle,
-                border: Border.all(color: AppTheme.border),
+                border: Border.all(
+                  color: isIncorrect ? AppTheme.error : AppTheme.border,
+                ),
               ),
             ),
           ),
