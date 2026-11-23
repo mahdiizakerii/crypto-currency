@@ -1,6 +1,6 @@
 import 'package:crypto_currency/core/utils/app_theme.dart';
-import 'package:crypto_currency/feature/news/domain/entities/news_item.dart';
 import 'package:crypto_currency/feature/news/presentation/bloc/news_bloc.dart';
+import 'package:crypto_currency/feature/news/presentation/widgets/news_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -67,173 +67,11 @@ class _NewsPageState extends State<NewsPage> {
                   const _EmptyNews()
                 else
                   for (var index = 0; index < state.items.length; index++)
-                    _NewsCard(item: state.items[index], featured: index == 0),
+                    NewsCard(item: state.items[index], featured: index == 0),
               ],
             ),
           );
         },
-      ),
-    );
-  }
-}
-
-class _NewsCard extends StatelessWidget {
-  const _NewsCard({required this.item, required this.featured});
-
-  final NewsItem item;
-  final bool featured;
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      color: AppTheme.surface,
-      clipBehavior: Clip.antiAlias,
-      margin: const EdgeInsets.only(bottom: 14),
-      child: InkWell(
-        onTap: () => showModalBottomSheet<void>(
-          context: context,
-          isScrollControlled: true,
-          backgroundColor: AppTheme.surface,
-          builder: (_) => _NewsDetails(item: item),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (item.imageUrl != null)
-              Image.network(
-                item.imageUrl!,
-                width: double.infinity,
-                height: featured ? 190 : 140,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) =>
-                    const _NewsImage(),
-              )
-            else
-              const _NewsImage(),
-            Padding(
-              padding: const EdgeInsets.all(14),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      _CategoryChip(label: item.category),
-                      if (item.isHot) ...[
-                        const SizedBox(width: 8),
-                        const _CategoryChip(label: 'HOT'),
-                      ],
-                      const Spacer(),
-                      Text(
-                        item.timeAgo,
-                        style: const TextStyle(
-                          color: AppTheme.textSecondary,
-                          fontSize: 11,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    item.title,
-                    maxLines: featured ? 3 : 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: AppTheme.textPrimary,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    item.source,
-                    style: const TextStyle(
-                      color: AppTheme.textSecondary,
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _NewsDetails extends StatelessWidget {
-  const _NewsDetails({required this.item});
-
-  final NewsItem item;
-
-  @override
-  Widget build(BuildContext context) {
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.all(22),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _CategoryChip(label: item.category),
-            const SizedBox(height: 12),
-            Text(
-              item.title,
-              style: const TextStyle(
-                color: AppTheme.textPrimary,
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              '${item.source}  ·  ${item.timeAgo}',
-              style: const TextStyle(color: AppTheme.textSecondary),
-            ),
-            const SizedBox(height: 18),
-            Text(
-              item.summary,
-              style: const TextStyle(color: AppTheme.textPrimary, height: 1.5),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _CategoryChip extends StatelessWidget {
-  const _CategoryChip({required this.label});
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-      decoration: BoxDecoration(
-        color: AppTheme.primaryBorder,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Text(
-        label,
-        style: const TextStyle(color: AppTheme.textPrimary, fontSize: 10),
-      ),
-    );
-  }
-}
-
-class _NewsImage extends StatelessWidget {
-  const _NewsImage();
-
-  @override
-  Widget build(BuildContext context) {
-    return const SizedBox(
-      height: 150,
-      width: double.infinity,
-      child: ColoredBox(
-        color: AppTheme.surfaceRaised,
-        child: Icon(Icons.article_outlined, color: AppTheme.textSecondary),
       ),
     );
   }
