@@ -55,7 +55,7 @@ class _WalletPageState extends State<WalletPage> with WidgetsBindingObserver {
         setState(() => _isAuthenticated = false);
       }
     } else if (state == AppLifecycleState.resumed && !_isAuthenticated) {
-      _authenticate();
+      unawaited(_authenticate());
     }
   }
 
@@ -65,15 +65,25 @@ class _WalletPageState extends State<WalletPage> with WidgetsBindingObserver {
     }
 
     setState(() => _isAuthenticating = true);
-    final isAuthenticated = await _biometricService.authenticate();
-    if (!mounted) {
-      return;
-    }
+    try {
+      final biometricEnabled = await BiometricPreferenceService().isEnabled();
+      if (!mounted) return;
 
-    setState(() {
-      _isAuthenticating = false;
-      _isAuthenticated = isAuthenticated;
-    });
+      final isAuthenticated =
+          !biometricEnabled || await _biometricService.authenticate();
+      if (!mounted) return;
+
+      setState(() => _isAuthenticated = isAuthenticated);
+    } finally {
+      if (mounted) {
+        setState(() => _isAuthenticating = false);
+      }
+    }
+  }
+
+  void _handleAuthenticationChanged(bool isAuthenticating) {
+    if (!mounted || _isAuthenticating == isAuthenticating) return;
+    setState(() => _isAuthenticating = isAuthenticating);
   }
 
   @override
@@ -85,9 +95,12 @@ class _WalletPageState extends State<WalletPage> with WidgetsBindingObserver {
           excluding: !_isAuthenticated,
           child: IgnorePointer(
             ignoring: !_isAuthenticated,
-            child: const MainBottomNav(
+            child: MainBottomNav(
               screens: [
-                _WalletDashboardPage(),
+                _WalletDashboardPage(
+                  biometricService: _biometricService,
+                  onAuthenticationChanged: _handleAuthenticationChanged,
+                ),
                 ChartPage(),
                 NewsPage(),
                 CollectiblesPage(),
@@ -128,7 +141,13 @@ class _WalletPageState extends State<WalletPage> with WidgetsBindingObserver {
 }
 
 class _WalletDashboardPage extends StatefulWidget {
-  const _WalletDashboardPage();
+  const _WalletDashboardPage({
+    required this.biometricService,
+    required this.onAuthenticationChanged,
+  });
+
+  final BiometricService biometricService;
+  final ValueChanged<bool> onAuthenticationChanged;
 
   @override
   State<_WalletDashboardPage> createState() => _WalletDashboardPageState();
@@ -155,7 +174,7 @@ class _WalletDashboardPageState extends State<_WalletDashboardPage> {
 
   Future<void> _handleBiometricChanged(bool value) async {
     if (value) {
-      final available = await BiometricService().isAvailable();
+      final available = await widget.biometricService.isAvailable();
 
       if (!mounted) return;
 
@@ -168,7 +187,11 @@ class _WalletDashboardPageState extends State<_WalletDashboardPage> {
         return;
       }
 
-      final authenticated = await FingerprintBottomSheet.show(context);
+      final authenticated = await FingerprintBottomSheet.show(
+        context,
+        biometricService: widget.biometricService,
+        onAuthenticationChanged: widget.onAuthenticationChanged,
+      );
 
       if (!authenticated || !mounted) return;
     }

@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:local_auth/local_auth.dart';
 
 class BiometricService {
@@ -13,7 +14,11 @@ class BiometricService {
   Future<bool> authenticate() async {
     try {
       return await _auth.authenticate(
-        localizedReason: 'Verify your fingerprint to enter the wallet',
+        localizedReason:
+            WidgetsBinding.instance.platformDispatcher.locale.languageCode ==
+                'fa'
+            ? 'برای ورود به کیف پول، اثر انگشت خود را تأیید کنید'
+            : 'Verify your fingerprint to enter the wallet',
         biometricOnly: true,
         persistAcrossBackgrounding: true,
       );
